@@ -1,0 +1,11 @@
+pure-python-adb
+ultralytics
+numpy
+<<<<<<< HEAD
+opencv-python
+
+
+colored
+=======
+opencv-python
+>>>>>>> d7bbe8680004e563253fd25b6a8150dc8d6cc1d7
