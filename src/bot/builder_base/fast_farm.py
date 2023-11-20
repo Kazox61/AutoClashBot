@@ -4,6 +4,7 @@ import math
 import time
 from ocr.text_finder import TextFinder
 from logger import Logger
+from bot.utils.button import Button
 
 
 def distance(x1, y1, x2, y2):
@@ -72,37 +73,38 @@ def sort_by_closest(lines):
 	return lines
 
 
+
+
+
 class FastFarm:
 	def __init__(self, android: Android):
 		self._android: Android = android
 		self._text_finder = TextFinder()
-		self._attack_button = None
-		self._find_now_button = None
+		self._attack_button = Button(self._text_finder, self._android.touch_input, "attack")
+		self._find_match_button = Button(self._text_finder, self._android.touch_input, "match")
+		self._next_opponent_button =Button(self._text_finder, self._android.touch_input, "next")
 
 	def _get_troop_placement(self):
-		image = self._android.device.get_screenshot()
+		image = self._android.get_screenshot()
 		red_lines = get_red_lines(image)
 		sorted_lines = sort_by_closest(red_lines)
 		points = distribute_points_on_lines(sorted_lines, 10)
 		return points
 
 	def _find_attack(self):
-		if not self._attack_button:
-			self._attack_button = self._text_finder.find(self._android.device.get_screenshot(), "attack")
-		self._android.touch_input.touch(self._attack_button[0], self._attack_button[1], 0.5)
+		self._attack_button.try_press(self._android.get_screenshot())
 		time.sleep(1)
-		if not self._find_now_button:
-			self._find_now_button = self._text_finder.find(self._android.device.get_screenshot(), "find now")
-		self._android.touch_input.touch(self._find_now_button[0], self._find_now_button[1], 0.5)
+		self._find_match_button.try_press(self._android.get_screenshot())
+		time.sleep(2)
+		self._next_opponent_button.try_press(self._android.get_screenshot())
+	
+	def _search_a_dead_base():
+		pass
 
 	def loop(self):
 		self._find_attack()
-		time.sleep(5)
+		input()
 
-		self._android.stop_app()
-		time.sleep(1)
-		self._android.start_app()
-		time.sleep(5)
 
 
 

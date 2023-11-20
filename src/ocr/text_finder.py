@@ -1,6 +1,6 @@
 import numpy as np
 import easyocr
-import cv2
+from difflib import SequenceMatcher
 
 def preprocess(image):
 	# Define a threshold value for color closeness to white
@@ -19,17 +19,18 @@ class TextFinder:
 	def __init__(self):
 		self._reader = easyocr.Reader(lang_list=['en'])
 
-	def find(self, image, text: str):
+	def find(self, image, text: str, conf: float=0.9):
 		processed = preprocess(image)
 		results = self._reader.readtext(processed)
 
 		for result in results:
 			found_text = result[1]
-			if text.lower() in found_text.lower():
+			sm = SequenceMatcher(a=text.lower(), b=found_text.lower())
+			if  sm.ratio() > conf:
 				position = result[0]  # Position information is a list of points
 				x_coords, y_coords = zip(*position)  # Separate x and y coordinates
 				center_x = sum(x_coords) / len(x_coords)  # Calculate the average of x coordinates
 				center_y = sum(y_coords) / len(y_coords)
-
 				return center_x, center_y
+			
 		return None

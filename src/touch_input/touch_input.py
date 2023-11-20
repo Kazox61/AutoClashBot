@@ -1,11 +1,12 @@
-from ppadb.device import Device as AdbDevice
-
+from adbutils import AdbDevice
 
 class TouchInput:
-	_adb_device: AdbDevice
-
-	def init(self, adb_device):
-		self._adb_device = adb_device
+	def init(self, adb_device: AdbDevice, device):
+		self.adb_device = adb_device
+		self.device = device
 
 	def touch(self, x: int, y: int, duration: float):
+		pass
+
+	def zoom_out(self):
 		pass
