@@ -14,15 +14,20 @@ def preprocess(image):
 	filtered_image[mask] = image[mask]
 	return filtered_image
 
+def convert_to_int(input: str) -> int:
+	mapping = {' ': '', 'I': '1', 'O': '0', 'o': '0', 'z': '2', 'Z': '2'}
+	for o, n in mapping.items():
+		input = input.replace(o, n)
+	return int(input)
 
 class TextFinder:
 	def __init__(self):
 		self._reader = easyocr.Reader(lang_list=['en'])
 
-	def find(self, image, text: str, conf: float=0.9):
-		processed = preprocess(image)
-		results = self._reader.readtext(processed)
-
+	def find(self, image, text: str, conf: float=0.9, paragraph=False):
+		#processed = preprocess(image)
+		results = self._reader.readtext(image, paragraph=paragraph)
+		print(results)
 		for result in results:
 			found_text = result[1]
 			sm = SequenceMatcher(a=text.lower(), b=found_text.lower())
@@ -34,3 +39,14 @@ class TextFinder:
 				return center_x, center_y
 			
 		return None
+	
+	def find_all(self, image, paragraph=False) -> dict[str, tuple[float, float]]:
+		text = {}
+		results = self._reader.readtext(image, paragraph=paragraph)
+		for result in results:
+			position = result[0]
+			x_coords, y_coords = zip(*position)
+			center_x = sum(x_coords) / len(x_coords)
+			center_y = sum(y_coords) / len(y_coords)
+			text[result[1]] = (center_x, center_y)
+		return text

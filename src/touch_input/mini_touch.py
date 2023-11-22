@@ -36,8 +36,9 @@ class MiniTouch(TouchInput):
 
 		self.adb_device.forward(f"tcp:{minitouch_port}", f"localabstract:minitouch_{minitouch_port}")
 		self.minitouch_process = subprocess.Popen(
-			f"{minitouch_destination_path}/minitouch -n minitouch_{minitouch_port} 2>&1",
-			shell=True, stdout=subprocess.PIPE, 
+			f"adb shell {minitouch_destination_path}/minitouch -n minitouch_{minitouch_port} 2>&1",
+			shell=True, 
+			stdout=subprocess.PIPE, 
 			stderr=subprocess.PIPE, 
 			start_new_session=True
 		)
@@ -75,7 +76,7 @@ class MiniTouch(TouchInput):
 		screen_x, screen_y = self.device.get_screen_size()
 		return int(x / screen_x * self.max_x), int(y / screen_y * self.max_y)
 	
-	def touch(self, x: int, y: int, duration: float):
+	def touch(self, x: int, y: int, duration: float=0.1):
 		x, y = self._transform(x, y)
 		self._send_minitouch_command(f"d 0 {x} {y} {self.default_pressure}\n")
 		self._send_minitouch_command("c\n")
@@ -94,7 +95,7 @@ class MiniTouch(TouchInput):
 			self._send_minitouch_command("c\n")
 			time.sleep(step_duration)
 
-	def swipe_along(self, points, duration=1, steps_per_move=5):
+	def swipe_along(self, points, duration=1, steps_per_move=5, first_sleep_duration=0.1):
 		for i in range(len(points)-1):
 			start_point = points[i]
 			end_point = points[i+1]
@@ -103,7 +104,7 @@ class MiniTouch(TouchInput):
 			if i == 0:
 				self._send_minitouch_command(f"d 0 {sx} {sy} {self.default_pressure}\n")
 				self._send_minitouch_command("c\n")
-				time.sleep(0.1)
+				time.sleep(first_sleep_duration)
 			self._swipe_move((sx, sy), (ex, ey), duration, steps_per_move)
 		self._send_minitouch_command("u 0\n")
 		self._send_minitouch_command("c\n")

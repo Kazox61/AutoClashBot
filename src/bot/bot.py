@@ -1,7 +1,7 @@
-from android import Android
+from core.android import Android
 import time
 from logger import Logger
-from bot.builder_base.fast_farm import FastFarm
+from bot.fast_farm import FastFarm
 
 
 class Bot:
@@ -12,7 +12,7 @@ class Bot:
 	def _start(self):
 		Logger.info("Start Clash of Clans App")
 		self._android.start_app()
-		time.sleep(10)
+		time.sleep(1)
 		self._android.touch_input.zoom_out()
 
 	def process(self):
