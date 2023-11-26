@@ -4,8 +4,10 @@ import math
 from ocr.text_finder import TextFinder
 from logger import Logger
 from bot.utils.text_button import TextButton
+from bot.utils.button import Button
 from bot.attack_strategies.circular_attack import CircularAttack
 from bot.dead_base_searcher import DeadBaseSearcher
+import time
 
 def distance(x1, y1, x2, y2):
 	return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -84,10 +86,36 @@ class FastFarm:
 		#self._collector_classifier = YoloDetector()
 		self._attack_button = TextButton(self._text_finder, self._android.touch_input, "attack")
 		self._find_match_button = TextButton(self._text_finder, self._android.touch_input, "match")
-		self._next_opponent_button =TextButton(self._text_finder, self._android.touch_input, "next")
+		self._next_opponent_button = TextButton(self._text_finder, self._android.touch_input, "next")
+		self._train_panel_button = Button((33, 477), self._android.touch_input)
+		self._quick_train_button = TextButton(self._text_finder, self._android.touch_input, "quick train")
+		self._train_button = TextButton(self._text_finder, self._android.touch_input, "train", 0.6, paragraph=True)
+		self._train_troops_button = TextButton(self._text_finder, self._android.touch_input, "train troops", paragraph=True)
+		self._close_button = Button((755, 80), self._android.touch_input)
 
 		self._dead_base_searcher = DeadBaseSearcher(self, self._android, self._text_finder)
-		self._circular_attack = CircularAttack(self._android)
+		self._circular_attack = CircularAttack(self._android, self._text_finder)
+
+	def _quick_train(self) -> None:
+		self._train_panel_button.press()
+		time.sleep(0.5)
+		self._quick_train_button.try_press(self._android.get_screenshot())
+		time.sleep(0.5)
+		self._train_button.try_press(self._android.get_screenshot())
+		time.sleep(1)
+		self._close_button.press()
+		time.sleep(0.5)
+
+	def _is_army_ready(self) -> bool:
+		self._train_panel_button.press()
+		time.sleep(0.5)
+		self._train_troops_button.try_press(self._android.get_screenshot())
+		time.sleep(0.5)
+		found_text = self._text_finder.find(self._android.get_screenshot(), "finish training", 0.8)
+		time.sleep(0.5)
+		self._close_button.press()
+		time.sleep(0.5)
+		return found_text is None
 
 	def _get_troop_placement(self):
 		image = self._android.get_screenshot()
@@ -96,11 +124,14 @@ class FastFarm:
 		points = distribute_points_on_lines(sorted_lines, 10)
 		return points
 
-	def loop(self):
+	def loop(self) -> None:
+		self._quick_train()
+		while not self._is_army_ready():
+			self._quick_train()
+			time.sleep(20)
 		search_result = self._dead_base_searcher.search()
+		Logger.info(f"Attacking base with {search_result}!")
 		self._circular_attack.start()
-		
-		input()
 
 
 

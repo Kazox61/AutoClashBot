@@ -2,7 +2,7 @@ from adbutils import adb, AdbClient, AdbDevice
 
 
 class Device:
-	def init(self) -> (AdbClient, AdbDevice):
+	def init(self, instance_config: dict) -> (AdbClient, AdbDevice):
 		self.adb_client = adb
 		self.adb_device = self.adb_client.device()
 		return self.adb_client, self.adb_device

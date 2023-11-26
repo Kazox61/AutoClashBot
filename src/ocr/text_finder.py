@@ -27,14 +27,13 @@ class TextFinder:
 	def find(self, image, text: str, conf: float=0.9, paragraph=False):
 		#processed = preprocess(image)
 		results = self._reader.readtext(image, paragraph=paragraph)
-		print(results)
 		for result in results:
 			found_text = result[1]
 			sm = SequenceMatcher(a=text.lower(), b=found_text.lower())
-			if  sm.ratio() > conf:
-				position = result[0]  # Position information is a list of points
-				x_coords, y_coords = zip(*position)  # Separate x and y coordinates
-				center_x = sum(x_coords) / len(x_coords)  # Calculate the average of x coordinates
+			if sm.ratio() > conf:
+				position = result[0]
+				x_coords, y_coords = zip(*position)
+				center_x = sum(x_coords) / len(x_coords)
 				center_y = sum(y_coords) / len(y_coords)
 				return center_x, center_y
 			

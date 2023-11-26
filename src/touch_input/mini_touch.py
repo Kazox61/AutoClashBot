@@ -7,7 +7,6 @@ import subprocess
 
 minitouch_source_path = "../files/minitouch"
 minitouch_destination_path = "/data/local/tmp"
-minitouch_port = 12345
 
 
 class MiniTouch(TouchInput):
@@ -15,9 +14,9 @@ class MiniTouch(TouchInput):
 		self._minitouch_client: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.default_pressure = 50
 
-	def init(self, adb_device: AdbDevice, device):
-		super().init(adb_device, device)
-
+	def init(self, adb_device: AdbDevice, device, instance_config: dict):
+		super().init(adb_device, device, instance_config)
+		self.minitouch_port = instance_config["miniTouchPort"]
 		if not self._has_mini_touch():
 			self._install()
 
@@ -34,9 +33,9 @@ class MiniTouch(TouchInput):
 	def _start_server(self):
 		Logger.info("MiniTouch starting")
 
-		self.adb_device.forward(f"tcp:{minitouch_port}", f"localabstract:minitouch_{minitouch_port}")
+		self.adb_device.forward(f"tcp:{self.minitouch_port}", f"localabstract:minitouch_{self.minitouch_port}")
 		self.minitouch_process = subprocess.Popen(
-			f"adb shell {minitouch_destination_path}/minitouch -n minitouch_{minitouch_port} 2>&1",
+			f"adb shell {minitouch_destination_path}/minitouch -n minitouch_{self.minitouch_port} 2>&1",
 			shell=True, 
 			stdout=subprocess.PIPE, 
 			stderr=subprocess.PIPE, 
@@ -45,7 +44,7 @@ class MiniTouch(TouchInput):
 		time.sleep(1)
 		Logger.info("MiniTouch Server started")
 
-		self._minitouch_client.connect(("localhost", minitouch_port))
+		self._minitouch_client.connect(("localhost", self.minitouch_port))
 		self._minitouch_client.settimeout(2)
 		header = b""
 

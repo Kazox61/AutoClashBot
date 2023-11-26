@@ -1,7 +1,7 @@
 from adbutils import AdbDevice
 
 class TouchInput:
-	def init(self, adb_device: AdbDevice, device):
+	def init(self, adb_device: AdbDevice, device, instance_config: dict):
 		self.adb_device = adb_device
 		self.device = device
 

@@ -3,17 +3,18 @@ from object_detection.yolo_detector import YoloDetector, DetectorResult
 from object_detection.yolo_classifier import YoloClassifier
 from ocr.text_finder import TextFinder, convert_to_int
 import time
-import cv2
 from difflib import SequenceMatcher
 from logger import Logger
 
+
 class SearchResult:
-	def __init__(self, duration: float, iterations: int) -> None:
+	def __init__(self, duration: float, iterations: int, resources: [int, int, int]) -> None:
 		self.duration = duration
 		self.iterations = iterations
+		self.resources = resources
 
 	def __repr__(self) -> str:
-		return f"Duration: {self.duration}secs, Iterations: {self.iterations}"
+		return f"Duration: {self.duration}secs, Iterations: {self.iterations}, Gold: {self.resources[0] if len(self.resources) > 0 else None}, Elixir: {self.resources[1]  if len(self.resources) > 1 else None}, Dark Elixir: {self.resources[2]  if len(self.resources) > 2 else None}"
 
 
 class DeadBaseSearcher:
@@ -31,22 +32,24 @@ class DeadBaseSearcher:
 		while True:
 			iterations += 1
 			time.sleep(4)
-			for _ in range(2):
-				try:
-					img = self._android.get_screenshot()
-					gold, elixir, dark_elixir = self._find_available_loot(img)
-					print(gold, elixir, dark_elixir)
+			try:
+				img = self._android.get_screenshot()
+				resources = self._find_available_loot(img)
 
-					val = self.validate(img)
-					#if val >= 10:
-						#break
+				val = self.validate(img)
+				if val >= 10:
 					break
-				except Exception as e:
-					time.sleep(1)
-					Logger.error(e)
+			except Exception as e:
+				resources = [None, None, None]
+				Logger.error(e)
+			try:
+				gold, elixir, dark_elexir = resources
+			except:
+				gold, elixir, dark_elexir = [None, None, None]
+			Logger.info(f"Found base with Gold: {gold}, Elixir: {elixir}, Dark Elixir: {dark_elexir}")
 			self._fast_farm._next_opponent_button.try_press(self._android.get_screenshot())
 		duration = time.time() - start_time
-		return SearchResult(duration, iterations)
+		return SearchResult(duration, iterations, resources)
 
 	def _start_search(self) -> None:
 		self._fast_farm._attack_button.try_press(self._android.get_screenshot())
@@ -75,8 +78,6 @@ class DeadBaseSearcher:
 			if index == loot_index + 3:
 				loot.append(convert_to_int(key)) 
 		return loot
-
-
 
 	def validate(self, image) -> int:
 		results: list[DetectorResult] = self.building_detector.predict(image)

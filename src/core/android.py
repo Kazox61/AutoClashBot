@@ -13,9 +13,9 @@ class Android:
 		self.touch_input = touch_input
 		self.device = device
 
-	def init(self):
-		self.adb_client, self.adb_device = self.device.init()
-		self.touch_input.init(self.adb_device, self.device)
+	def init(self, instance_config: dict):
+		self.adb_client, self.adb_device = self.device.init(instance_config)
+		self.touch_input.init(self.adb_device, self.device, instance_config)
 
 	def start_app(self):
 		self.adb_device.shell(f"monkey -p {package_name} 1")

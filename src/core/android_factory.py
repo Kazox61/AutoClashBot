@@ -1,4 +1,3 @@
-from core.config import ConfigCore
 from core.android import Android
 from logger import Logger
 from touch_input.mini_touch import MiniTouch
@@ -7,17 +6,16 @@ from device.physical_device import PhysicalDevice
 from device.virtual_device import VirtualDevice
 
 
-def build() -> Android:
-	config = ConfigCore.get_config()
-	if config["touchInput"] == "MiniTouch":
+def build(instance_config) -> Android:
+	if instance_config["touchInput"] == "MiniTouch":
 		touch_input = MiniTouch()
-	elif config["touchInput"] == "AdbTouch":
+	elif instance_config["touchInput"] == "AdbTouch":
 		touch_input = AdbTouch()
 	else:
 		touch_input = AdbTouch()
-		Logger.error(f"DeviceType '{config['touchInput']}' doesn't exist.")
+		Logger.error(f"DeviceType '{instance_config['touchInput']}' doesn't exist.")
 
-	if config["deviceType"] == "PhysicalDevice":
+	if instance_config["deviceType"] == "PhysicalDevice":
 		device = PhysicalDevice()
 	else:
 		device = VirtualDevice()
