@@ -6,18 +6,17 @@ import threading
 
 
 def construct():
-	Logger.init()
-	Logger.info("Logger initialized. Logger can be used now")
+    Logger.init()
+    Logger.info("Logger initialized. Logger can be used now")
 
-	Logger.info("Start constructing Resources")
-	config = ConfigCore.get_config()
-	for instance_config in config:
-		android = android_factory.build(instance_config)
-		Logger.info("AndroidFactory built an instance of android")
-		android.init(instance_config)
-		Logger.info("Android initialized")
+    Logger.info("Start constructing Resources")
+    config = ConfigCore.get_config()
+    for instance_config in config:
+        android = android_factory.build(instance_config)
+        Logger.info("AndroidFactory built an instance of android")
+        android.init(instance_config)
+        Logger.info("Android initialized")
 
-		bot = Bot(android)
-		thread = threading.Thread(target=bot.process)
-		thread.start()
-
+        bot = Bot(android)
+        thread = threading.Thread(target=bot.process)
+        thread.start()

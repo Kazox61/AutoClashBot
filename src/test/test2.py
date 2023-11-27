@@ -5,17 +5,17 @@ import os
 
 
 def test_images():
-	if os.path.exists("output"):
-		os.remove("output")
-	os.mkdir("output")
-	for i, image_name in enumerate(os.listdir("images")):
-		image = cv2.imread(os.path.join("images", image_name))
+    if os.path.exists("output"):
+        os.remove("output")
+    os.mkdir("output")
+    for i, image_name in enumerate(os.listdir("images")):
+        image = cv2.imread(os.path.join("images", image_name))
 
-		image = preprocess_image(image)
+        image = preprocess_image(image)
 
-		# done testing
-		cv2.imwrite(os.path.join("output",image_name), image)
+        # done testing
+        cv2.imwrite(os.path.join("output", image_name), image)
 
 
 if __name__ == "__main__":
-	test_images()
+    test_images()

@@ -7,18 +7,18 @@ from device.virtual_device import VirtualDevice
 
 
 def build(instance_config) -> Android:
-	if instance_config["touchInput"] == "MiniTouch":
-		touch_input = MiniTouch()
-	elif instance_config["touchInput"] == "AdbTouch":
-		touch_input = AdbTouch()
-	else:
-		touch_input = AdbTouch()
-		Logger.error(f"DeviceType '{instance_config['touchInput']}' doesn't exist.")
+    if instance_config["touchInput"] == "MiniTouch":
+        touch_input = MiniTouch()
+    elif instance_config["touchInput"] == "AdbTouch":
+        touch_input = AdbTouch()
+    else:
+        touch_input = AdbTouch()
+        Logger.error(
+            f"DeviceType '{instance_config['touchInput']}' doesn't exist.")
 
-	if instance_config["deviceType"] == "PhysicalDevice":
-		device = PhysicalDevice()
-	else:
-		device = VirtualDevice()
+    if instance_config["deviceType"] == "PhysicalDevice":
+        device = PhysicalDevice()
+    else:
+        device = VirtualDevice()
 
-	return Android(touch_input, device)
-
+    return Android(touch_input, device)
