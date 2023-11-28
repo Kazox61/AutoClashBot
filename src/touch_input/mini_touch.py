@@ -4,6 +4,7 @@ import socket
 import time
 from adbutils import AdbDevice, AdbConnection
 import subprocess
+from utils import add_screen_noise
 
 minitouch_source_path = "../files/minitouch"
 minitouch_destination_path = "/data/local/tmp"
@@ -76,12 +77,16 @@ class MiniTouch(TouchInput):
     def send_minitouch_command(self, command: str):
         self.minitouch_client.sendall(command.encode())
 
-    def transform(self, x, y) -> (int, int):
-        screen_x, screen_y = self.device.get_screen_size()
-        return int(x / screen_x * self.max_x), int(y / screen_y * self.max_y)
+    def transform(self, x, y, randomness: bool = True) -> (int, int):
+        screen_x, screen_y = self.screen_size
+        tx = int(x / screen_x * self.max_x)
+        ty = int(y / screen_y * self.max_y)
+        if randomness:
+            tx, ty = add_screen_noise((tx, ty), (self.max_x, self.max_y))
+        return tx, ty
 
-    def touch(self, x: int, y: int, duration: float = 0.1):
-        x, y = self.transform(x, y)
+    def touch(self, x: int, y: int, duration: float = 0.1, randomness: bool = True):
+        x, y = self.transform(x, y, randomness)
         self.send_minitouch_command(f"d 0 {x} {y} {self.default_pressure}\n")
         self.send_minitouch_command("c\n")
         time.sleep(duration)
@@ -95,8 +100,12 @@ class MiniTouch(TouchInput):
         step_y = (ey - sy) / steps
         step_duration = duration / steps
         for step in range(1, steps):
+            x, y = add_screen_noise(
+                (sx + step * step_x, sy + step * step_y),
+                (self.max_x, self.max_y)
+            )
             self.send_minitouch_command(
-                f"m 0 {int(sx + step * step_x)} {int(sy + step * step_y)} {self.default_pressure}\n")
+                f"m 0 {x} {y} {self.default_pressure}\n")
             self.send_minitouch_command("c\n")
             time.sleep(step_duration)
 
@@ -104,11 +113,12 @@ class MiniTouch(TouchInput):
         for i in range(len(points)-1):
             start_point = points[i]
             end_point = points[i+1]
-            sx, sy = self.transform(start_point[0], start_point[1])
-            ex, ey = self.transform(end_point[0], end_point[1])
+            sx, sy = self.transform(start_point[0], start_point[1], False)
+            ex, ey = self.transform(end_point[0], end_point[1], False)
             if i == 0:
+                x, y = add_screen_noise((sx, sy), (self.max_x, self.max_y))
                 self.send_minitouch_command(
-                    f"d 0 {sx} {sy} {self.default_pressure}\n")
+                    f"d 0 {x} {y} {self.default_pressure}\n")
                 self.send_minitouch_command("c\n")
                 time.sleep(first_sleep_duration)
             self.swipe_move((sx, sy), (ex, ey), duration, steps_per_move)
@@ -120,7 +130,7 @@ class MiniTouch(TouchInput):
         self.zoom_out_vertical(0.25)
         self.zoom_out_horizontal(0.75)
         self.zoom_out_vertical(0.75)
-        max_x, max_y = self.device.get_screen_size()
+        max_x, max_y = self.screen_size
         self.swipe_along([(int(max_x * 0.5), int(max_y * 0.2)),
                          (int(max_x * 0.5), int(max_y * 0.8))])
 
