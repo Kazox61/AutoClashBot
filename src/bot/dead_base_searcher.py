@@ -36,7 +36,7 @@ class DeadBaseSearcher:
         iterations = 0
         while True:
             iterations += 1
-            time.sleep(4)
+            time.sleep(8)
             try:
                 img = self.android.get_screenshot()
                 resources = self.find_available_loot(img)

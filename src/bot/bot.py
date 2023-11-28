@@ -1,14 +1,14 @@
 from core.android import Android
 import time
 from logging import Logger
-from bot.fast_farm import FastFarm
+from bot.home_village import HomeVillage
 
 
 class Bot:
     def __init__(self, logger: Logger, android: Android):
         self.logger = logger
         self.android = android
-        self.fast_farm = FastFarm(self.logger, self.android)
+        self.home_village = HomeVillage(self.logger, self.android)
 
     def start(self):
         self.logger.info("Start Clash of Clans App")
@@ -22,4 +22,4 @@ class Bot:
             self.loop()
 
     def loop(self):
-        self.fast_farm.loop()
+        self.home_village.loop()

@@ -3,20 +3,6 @@ import easyocr
 from difflib import SequenceMatcher
 
 
-def preprocess(image):
-    # Define a threshold value for color closeness to white
-    color_threshold = 10
-
-    # Create a mask for white or near-white colors
-    mask = np.logical_and.reduce(
-        np.abs(image - [255, 255, 255]) < color_threshold, axis=-1)
-
-    # Apply the mask to filter out non-white or near-white colors
-    filtered_image = np.zeros_like(image)
-    filtered_image[mask] = image[mask]
-    return filtered_image
-
-
 def convert_to_int(input: str) -> int:
     mapping = {' ': '', 'I': '1', 'O': '0', 'o': '0', 'z': '2', 'Z': '2'}
     for o, n in mapping.items():
@@ -28,8 +14,7 @@ class TextFinder:
     def __init__(self):
         self.reader = easyocr.Reader(lang_list=['en'])
 
-    def find(self, image, text: str, conf: float = 0.9, paragraph=False):
-        # processed = preprocess(image)
+    def find(self, image: np.ndarray, text: str, conf: float = 0.9, paragraph=False) -> tuple[int, int] | None:
         results = self.reader.readtext(image, paragraph=paragraph)
         for result in results:
             found_text = result[1]
@@ -43,7 +28,7 @@ class TextFinder:
 
         return None
 
-    def find_all(self, image, paragraph=False) -> dict[str, tuple[float, float]]:
+    def find_all(self, image: np.ndarray, paragraph=False) -> dict[str, tuple[float, float]]:
         text = {}
         results = self.reader.readtext(image, paragraph=paragraph)
         for result in results:

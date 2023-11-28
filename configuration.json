@@ -1,14 +1,14 @@
 [
-	{	
-		"deviceType": "VirtualDevice",
-		"touchInput": "MiniTouch",
-		"bluestacksInstance": "Pie64",
-		"miniTouchPort": 58800
-	},
-	{	
-		"deviceType": "VirtualDevice",
-		"touchInput": "MiniTouch",
-		"bluestacksInstance": "Pie64_1",
-		"miniTouchPort": 58801
-	}
+  {
+    "deviceType": "VirtualDevice",
+    "touchInput": "MiniTouch",
+    "bluestacksInstance": "Pie64",
+    "miniTouchPort": 58800
+  },
+  {
+    "deviceType": "VirtualDevice",
+    "touchInput": "MiniTouch",
+    "bluestacksInstance": "Pie64_1",
+    "miniTouchPort": 58801
+  }
 ]
