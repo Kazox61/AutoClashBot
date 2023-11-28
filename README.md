@@ -2,8 +2,8 @@
 
 ### Features:
 
-- [ ] Attack Dead Bases
-- [ ] Train Army
+- [x] Attack Dead Bases
+- [x] Train Army
 - [ ] Activate Super Troops
 - [ ] Donate Troops
 - [ ] Play Clan Games
