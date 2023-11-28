@@ -1,24 +1,25 @@
 from core.android import Android
 import time
-from logger import Logger
+from logging import Logger
 from bot.fast_farm import FastFarm
 
 
 class Bot:
-    def __init__(self, android: Android):
-        self._android = android
-        self._fast_farm = FastFarm(android)
+    def __init__(self, logger: Logger, android: Android):
+        self.logger = logger
+        self.android = android
+        self.fast_farm = FastFarm(self.logger, self.android)
 
-    def _start(self):
-        Logger.info("Start Clash of Clans App")
-        self._android.start_app()
+    def start(self):
+        self.logger.info("Start Clash of Clans App")
+        self.android.start_app()
         time.sleep(10)
-        self._android.touch_input.zoom_out()
+        self.android.touch_input.zoom_out()
 
     def run(self):
-        self._start()
+        self.start()
         while True:
-            self._loop()
+            self.loop()
 
-    def _loop(self):
-        self._fast_farm.loop()
+    def loop(self):
+        self.fast_farm.loop()

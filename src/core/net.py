@@ -1,13 +1,14 @@
 import socket
 from pymitter import EventEmitter
 from threading import *
-
+from logging import getLogger
 event_emitter = EventEmitter()
 
 
 class ServerThread(Thread):
     def __init__(self, ip: str, port: int) -> None:
         Thread.__init__(self)
+        self.logger = getLogger("acb.core")
         self.address = ip
         self.port = port
         self.client = socket.socket()
@@ -15,20 +16,21 @@ class ServerThread(Thread):
     def run(self):
         self.client.bind((self.address, self.port))
 
-        print(f'Server is listening on {self.address}:{self.port}'.format(
+        self.logger.info(f'Server is listening on {self.address}:{self.port}'.format(
             self.address, self.port))
 
         while True:
             self.client.listen(5)
             client, address = self.client.accept()
 
-            print('New connection from {}'.format(address[0]))
-            clientThread = ClientThread(client).start()
+            self.logger.info('New connection from {}'.format(address[0]))
+            ClientThread(client).start()
 
 
 class ClientThread(Thread):
     def __init__(self, client: socket.socket) -> None:
         Thread.__init__(self)
+        self.logger = getLogger("acb.core")
         self.client = client
 
     def recvall(self, size) -> bytes:
@@ -53,6 +55,7 @@ class ClientThread(Thread):
             data = self.recvall(length)
 
             if len(header) >= 9:
-                print(
+                self.logger.debug(
                     f"Instance: {instance_number}, CommandId: {command_id}, Length: {length}, Version: {version}, Data: {data}")
-                event_emitter.emit(f"{instance_number}:{command_id}", data)
+                event_emitter.emit(
+                    f"{instance_number}:{command_id}", data.decode('utf-8'))

@@ -2,7 +2,7 @@ from device.device import Device
 from adbutils import adb, AdbClient, AdbDevice
 from pywinauto.application import Application
 import time
-from logger import Logger
+from logging import getLogger
 
 bluestacks_app_path = "C:/Program Files/BlueStacks_nxt/HD-PLAYER.exe"
 bluestacks_config_path = "C:/ProgramData/BlueStacks_nxt/bluestacks.conf"
@@ -12,18 +12,18 @@ class VirtualDevice(Device):
     def __init__(self) -> None:
         super().__init__()
 
-    def _start_virtual_device(self):
-        Logger.info(f"Starting Bluestacks:{self.instance_name}")
+    def start_virtual_device(self):
+        getLogger("acb.core").info(f"Starting Bluestacks:{self.instance_name}")
         self.application = Application().start(
             f"{bluestacks_app_path} --instance {self.instance_name}")
 
-    def _close_virtual_device(self):
+    def close_virtual_device(self):
         self.application.kill()
 
     def init(self, instance_config: dict) -> (AdbClient, AdbDevice):
         self.instance_name = instance_config["bluestacksInstance"]
         self.adb_port_key = f"bst.instance.{self.instance_name}.status.adb_port"
-        self._start_virtual_device()
+        self.start_virtual_device()
         time.sleep(10)
         self.read_adb_port()
         self.adb_client = adb

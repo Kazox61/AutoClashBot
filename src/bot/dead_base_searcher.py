@@ -4,7 +4,9 @@ from object_detection.yolo_classifier import YoloClassifier
 from ocr.text_finder import TextFinder, convert_to_int
 import time
 from difflib import SequenceMatcher
-from logger import Logger
+from logging import Logger
+from config.buttons import Buttons
+from bot.utils.button_touch import ButtonTouch
 
 
 class SearchResult:
@@ -18,10 +20,11 @@ class SearchResult:
 
 
 class DeadBaseSearcher:
-    def __init__(self, fast_farm, android: Android, text_finder: TextFinder) -> None:
-        self._fast_farm = fast_farm
-        self._android = android
-        self._text_finder = text_finder
+    def __init__(self, logger: Logger, android: Android, text_finder: TextFinder) -> None:
+        self.logger = logger
+        self.android = android
+        self.text_finder = text_finder
+        self.button_touch = ButtonTouch(self.android)
         self.building_detector = YoloDetector(
             "../object_detection/models/building_detector_model.pt", 0.7)
         self.collector_classifier = YoloClassifier(
@@ -29,43 +32,40 @@ class DeadBaseSearcher:
 
     def search(self) -> None:
         start_time = time.time()
-        self._start_search()
+        self.start_search()
         iterations = 0
         while True:
             iterations += 1
             time.sleep(4)
             try:
-                img = self._android.get_screenshot()
-                resources = self._find_available_loot(img)
+                img = self.android.get_screenshot()
+                resources = self.find_available_loot(img)
 
                 val = self.validate(img)
                 if val >= 10:
                     break
             except Exception as e:
                 resources = [None, None, None]
-                Logger.error(e)
+                self.logger.error(e)
             try:
                 gold, elixir, dark_elexir = resources
             except:
                 gold, elixir, dark_elexir = [None, None, None]
-            Logger.info(
+            self.logger.info(
                 f"Found base with Gold: {gold}, Elixir: {elixir}, Dark Elixir: {dark_elexir}")
-            self._fast_farm._next_opponent_button.try_press(
-                self._android.get_screenshot())
+            self.button_touch.try_press(Buttons.NextOpponent)
         duration = time.time() - start_time
         return SearchResult(duration, iterations, resources)
 
-    def _start_search(self) -> None:
-        self._fast_farm._attack_button.try_press(
-            self._android.get_screenshot())
+    def start_search(self) -> None:
+        self.button_touch.try_press(Buttons.StartAttack)
         time.sleep(1)
-        self._fast_farm._find_match_button.try_press(
-            self._android.get_screenshot())
+        self.button_touch.try_press(Buttons.FindAMatch)
 
-    def _find_available_loot(self, screen_shot) -> [int, int, int]:
+    def find_available_loot(self, screen_shot) -> [int, int, int]:
         height, width, _ = screen_shot.shape
         cropped = screen_shot[0: int(height * 0.3), int(0):int(width * 0.3)]
-        result = self._text_finder.find_all(cropped)
+        result = self.text_finder.find_all(cropped)
         values = [(key, value) for key, value in result.items()]
 
         loot = []

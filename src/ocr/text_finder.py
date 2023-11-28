@@ -26,11 +26,11 @@ def convert_to_int(input: str) -> int:
 
 class TextFinder:
     def __init__(self):
-        self._reader = easyocr.Reader(lang_list=['en'])
+        self.reader = easyocr.Reader(lang_list=['en'])
 
     def find(self, image, text: str, conf: float = 0.9, paragraph=False):
         # processed = preprocess(image)
-        results = self._reader.readtext(image, paragraph=paragraph)
+        results = self.reader.readtext(image, paragraph=paragraph)
         for result in results:
             found_text = result[1]
             sm = SequenceMatcher(a=text.lower(), b=found_text.lower())
@@ -45,7 +45,7 @@ class TextFinder:
 
     def find_all(self, image, paragraph=False) -> dict[str, tuple[float, float]]:
         text = {}
-        results = self._reader.readtext(image, paragraph=paragraph)
+        results = self.reader.readtext(image, paragraph=paragraph)
         for result in results:
             position = result[0]
             x_coords, y_coords = zip(*position)

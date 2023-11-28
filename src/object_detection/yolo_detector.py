@@ -23,11 +23,11 @@ class DetectorResult:
 
 class YoloDetector:
     def __init__(self, model_path: str, min_conf: float):
-        self._model = YOLO(model_path)
+        self.model = YOLO(model_path)
         self.min_conf = min_conf
 
     def predict(self, image_data) -> list[DetectorResult]:
-        result = self._model.predict(
+        result = self.model.predict(
             source=image_data, verbose=False, conf=self.min_conf)[0]
         names = result.names
         boxes = result.boxes
