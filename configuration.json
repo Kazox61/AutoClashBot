@@ -1,14 +1,13 @@
-[
-  {
-    "deviceType": "VirtualDevice",
-    "touchInput": "MiniTouch",
-    "bluestacksInstance": "Pie64",
-    "miniTouchPort": 58800
-  },
-  {
-    "deviceType": "VirtualDevice",
-    "touchInput": "MiniTouch",
-    "bluestacksInstance": "Pie64_1",
-    "miniTouchPort": 58801
-  }
-]
+{
+  "bluestacksAppPath": "C:/Program Files/BlueStacks_nxt/HD-PLAYER.exe",
+  "bluestacksConfigPath": "C:/ProgramData/BlueStacks_nxt/bluestacks.conf",
+  "minitouchStartPort": 58800,
+  "instances": [
+    {
+      "bluestacksDisplayName": "A"
+    },
+    {
+      "bluestacksDisplayName": "B"
+    }
+  ]
+}

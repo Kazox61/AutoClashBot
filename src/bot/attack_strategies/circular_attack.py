@@ -15,7 +15,7 @@ class CircularAttack:
 
     def start(self):
         self.select_troop(0)
-        max_x, max_y = self.android.device.get_screen_size()
+        max_x, max_y = self.android.bluestacks.get_screen_size()
         touch_cylce = [
             (max_x * 0.5, max_y * 0.05),
             (max_x * 0.25, max_y * 0.25),
@@ -30,19 +30,19 @@ class CircularAttack:
         touches.extend(touch_cylce)
         touches.extend(touch_cylce)
         touches.extend(touch_cylce)
-        self.android.touch_input.swipe_along(touches, 0.5, 5, 1)
+        self.android.minitouch.swipe_along(touches, 0.5, 5, 1)
         time.sleep(1)
         self.select_troop(2)
-        self.android.touch_input.touch(max_x * 0.5, max_y * 0.05)
+        self.android.minitouch.touch(max_x * 0.5, max_y * 0.05)
         time.sleep(0.5)
         self.select_troop(3)
-        self.android.touch_input.touch(max_x * 0.5, max_y * 0.05)
+        self.android.minitouch.touch(max_x * 0.5, max_y * 0.05)
         time.sleep(0.5)
         self.select_troop(4)
-        self.android.touch_input.touch(max_x * 0.5, max_y * 0.05)
+        self.android.minitouch.touch(max_x * 0.5, max_y * 0.05)
         time.sleep(0.5)
         self.select_troop(5)
-        self.android.touch_input.touch(max_x * 0.5, max_y * 0.05)
+        self.android.minitouch.touch(max_x * 0.5, max_y * 0.05)
         time.sleep(5)
         self.select_troop(2)
         self.select_troop(3)
@@ -52,7 +52,7 @@ class CircularAttack:
         self.leave_attack()
 
     def select_troop(self, index):
-        self.android.touch_input.touch(start_center_x + index * step, row_y)
+        self.android.minitouch.touch(start_center_x + index * step, row_y)
 
     def leave_attack(self):
         self.button_touch.try_press(Buttons.Surrender)

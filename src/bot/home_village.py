@@ -1,5 +1,5 @@
 from core.android import Android
-from ocr.text_finder import TextFinder
+from cv.text_finder import TextFinder
 from logging import Logger
 from bot.attack_strategies.circular_attack import CircularAttack
 from bot.dead_base_searcher import DeadBaseSearcher

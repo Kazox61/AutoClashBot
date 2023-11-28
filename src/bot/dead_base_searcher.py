@@ -1,12 +1,13 @@
 from core.android import Android
-from object_detection.yolo_detector import YoloDetector, DetectorResult
-from object_detection.yolo_classifier import YoloClassifier
-from ocr.text_finder import TextFinder, convert_to_int
+from cv.yolo_detector import YoloDetector, DetectorResult
+from cv.yolo_classifier import YoloClassifier
+from cv.text_finder import TextFinder, convert_to_int
 import time
 from difflib import SequenceMatcher
 from logging import Logger
 from config.buttons import Buttons
 from bot.utils.button_touch import ButtonTouch
+import os
 
 
 class SearchResult:
@@ -26,9 +27,9 @@ class DeadBaseSearcher:
         self.text_finder = text_finder
         self.button_touch = ButtonTouch(self.android)
         self.building_detector = YoloDetector(
-            "../object_detection/models/building_detector_model.pt", 0.7)
+            os.path.join(__file__, "../../../assets/or_models/building_detector_model.pt"), 0.7)
         self.collector_classifier = YoloClassifier(
-            "../object_detection/models/collector_classifier_model.pt")
+            os.path.join(__file__, "../../../assets/or_models/collector_classifier_model.pt"))
 
     def search(self) -> None:
         start_time = time.time()

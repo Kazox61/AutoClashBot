@@ -14,7 +14,7 @@ class Bot:
         self.logger.info("Start Clash of Clans App")
         self.android.start_app()
         time.sleep(10)
-        self.android.touch_input.zoom_out()
+        self.android.minitouch.zoom_out()
 
     def run(self):
         self.start()

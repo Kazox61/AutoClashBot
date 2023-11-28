@@ -1,7 +1,7 @@
 from core.android import Android
 from config.buttons import Buttons
 import cv2
-from image.extensions import template_matching
+from cv.extensions import template_matching
 
 
 class ButtonTouch:
@@ -16,8 +16,8 @@ class ButtonTouch:
             result = template_matching(img, template)
             if result is None:
                 return False
-            self.android.touch_input.touch(result.centerx, result.centery)
+            self.android.minitouch.touch(result.centerx, result.centery)
         elif type(value) == tuple:
-            self.android.touch_input.touch(value[0], value[1])
+            self.android.minitouch.touch(value[0], value[1])
             return True
         return False

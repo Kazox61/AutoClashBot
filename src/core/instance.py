@@ -1,7 +1,7 @@
 from pymitter import EventEmitter
 from threading import Thread
-from core import android_factory
 from bot.bot import Bot
+from core.android import Android
 from config.commands import Commands
 import time
 import cv2
@@ -10,26 +10,43 @@ import os
 
 
 class Instance(Thread):
-    def __init__(self, event_emitter: EventEmitter, instance_index: int, instance_config: dict) -> None:
+    def __init__(
+        self,
+        bluestacks_app_path: str,
+        bluestacks_config_path: str,
+        minitouch_port: int,
+        instance_index: int,
+        instance_config: dict,
+        event_emitter: EventEmitter,
+    ) -> None:
+        self.bluestacks_display_name = instance_config['bluestacksDisplayName']
         self.logger = setup_logger(
-            f"acb.{instance_config['bluestacksInstance']}",
+            f"acb.{instance_index}.{self.bluestacks_display_name}",
             os.path.join(
                 __file__,
-                f"../../../logs/{instance_config['bluestacksInstance']}.log"
+                f"../../../logs/{self.bluestacks_display_name}.log"
             ),
             None,
             logging.DEBUG
         )
-        self.event_emitter = event_emitter
+        self.bluestacks_app_path = bluestacks_app_path
+        self.bluestacks_config_path = bluestacks_config_path
+        self.minitouch_port = minitouch_port
         self.instance_index = instance_index
         self.instance_config = instance_config
+        self.event_emitter = event_emitter
         self.init_events()
         Thread.__init__(self)
 
     def run(self) -> None:
         time.sleep(self.instance_index * 10)
-        self.android = android_factory.build(self.instance_config)
-        self.android.init(self.instance_config)
+        self.android = Android(
+            self.bluestacks_app_path,
+            self.bluestacks_config_path,
+            self.bluestacks_display_name,
+            self.minitouch_port
+        )
+        self.android.initialize()
         self.bot = Bot(self.logger, self.android)
         self.bot.run()
 

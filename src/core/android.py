@@ -1,6 +1,5 @@
-from touch_input.touch_input import TouchInput
-from device.device import Device
-from adbutils import AdbClient, AdbDevice
+from core.bluestacks import Bluestacks
+from core.minitouch import Minitouch
 import numpy as np
 
 
@@ -8,16 +7,24 @@ package_name = "com.supercell.clashofclans"
 
 
 class Android:
-    adb_client: AdbClient
-    adb_device: AdbDevice
+    def __init__(
+        self,
+        bluestacks_app_path: str,
+        bluestacks_config_path: str,
+        bluestacks_display_name: str,
+        minitouch_port: int
 
-    def __init__(self, touch_input: TouchInput, device: Device):
-        self.touch_input = touch_input
-        self.device = device
+    ) -> None:
+        self.bluestacks = Bluestacks(
+            bluestacks_app_path,
+            bluestacks_config_path,
+            bluestacks_display_name
+        )
+        self.minitouch = Minitouch(minitouch_port)
 
-    def init(self, instance_config: dict):
-        self.adb_client, self.adb_device = self.device.init(instance_config)
-        self.touch_input.init(self.adb_device, self.device, instance_config)
+    def initialize(self):
+        self.adb_client, self.adb_device = self.bluestacks.start()
+        self.minitouch.setup(self.adb_device, self.bluestacks)
 
     def start_app(self):
         self.adb_device.shell(f"monkey -p {package_name} 1")
