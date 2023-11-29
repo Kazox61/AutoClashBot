@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 
-def template_matching(img: np.ndarray, template: np.ndarray, threshold: float = 0.8) -> Rect:
+def template_matching(img: np.ndarray, template: np.ndarray, threshold: float = 0.8) -> Rect | None:
     template = cv2.cvtColor(template.copy(), cv2.COLOR_BGR2GRAY)
     img = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
     w, h = template.shape[::-1]

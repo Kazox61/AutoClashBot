@@ -18,6 +18,6 @@ class YoloClassifier:
     def __init__(self, model_path: str):
         self.model = YOLO(model_path)
 
-    def predict(self, image_data) -> ClassifierResult:
-        result = self.model.predict(source=image_data, verbose=False)[0]
+    def predict(self, image) -> ClassifierResult:
+        result = self.model.predict(source=image, verbose=False)[0]
         return ClassifierResult(result)

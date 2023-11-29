@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+import numpy as np
 
 
 class DetectorResult:
@@ -26,9 +27,9 @@ class YoloDetector:
         self.model = YOLO(model_path)
         self.min_conf = min_conf
 
-    def predict(self, image_data) -> list[DetectorResult]:
+    def predict(self, image: np.ndarray) -> list[DetectorResult]:
         result = self.model.predict(
-            source=image_data, verbose=False, conf=self.min_conf)[0]
+            source=image, verbose=False, conf=self.min_conf)[0]
         names = result.names
         boxes = result.boxes
         predict_results = []

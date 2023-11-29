@@ -21,13 +21,18 @@ class SearchResult:
 
 
 class DeadBaseSearcher:
-    def __init__(self, logger: Logger, android: Android, text_finder: TextFinder) -> None:
+    def __init__(
+            self,
+            logger: Logger,
+            android: Android,
+            building_detector: YoloDetector,
+            text_finder: TextFinder
+    ) -> None:
         self.logger = logger
         self.android = android
+        self.building_detector = building_detector
         self.text_finder = text_finder
         self.button_touch = ButtonTouch(self.android)
-        self.building_detector = YoloDetector(
-            os.path.join(__file__, "../../../assets/or_models/building_detector_model.pt"), 0.7)
         self.collector_classifier = YoloClassifier(
             os.path.join(__file__, "../../../assets/or_models/collector_classifier_model.pt"))
 
@@ -37,9 +42,14 @@ class DeadBaseSearcher:
         iterations = 0
         while True:
             iterations += 1
-            time.sleep(8)
+            time.sleep(4)
             try:
                 img = self.android.get_screenshot()
+
+                while self.text_finder.find(img, "searching for opponent", 0.5) is not None:
+                    time.sleep(2)
+                    img = self.android.get_screenshot()
+
                 resources = self.find_available_loot(img)
 
                 val = self.validate(img)
