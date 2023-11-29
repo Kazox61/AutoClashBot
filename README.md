@@ -4,7 +4,7 @@
 
 - [x] Attack Dead Bases
 - [x] Train Army
-- [ ] Activate Super Troops
+- [x] Activate Super Troops
 - [ ] Donate Troops
 - [ ] Play Clan Games
 - [ ] Collect Resources
