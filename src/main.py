@@ -3,6 +3,16 @@ from config.config import ConfigCore
 from core.instance import Instance
 from _logging import setup_logger, logging
 import os
+import re
+
+
+def get_instance_names(conf_path) -> list[str]:
+    with open(conf_path, 'r') as file:
+        text = file.read()
+        instance_names = re.findall(
+            r"bst\.instance\.([^.]+)\.abi_list", text)
+        return instance_names
+
 
 if __name__ == "__main__":
     logger = setup_logger(
@@ -16,14 +26,23 @@ if __name__ == "__main__":
     server.start()
 
     config = ConfigCore.get_config()
+
+    instance_names = get_instance_names(config['bluestacksConfPath'])
+
     bluestacks_app_path = config['bluestacksAppPath']
-    bluestacks_config_path = config['bluestacksConfigPath']
+    bluestacks_conf_path = config['bluestacksConfPath']
     minitouch_start_port = config['minitouchStartPort']
+    bluestacks_sharedFolder_path = config['bluestacksSharedFolderPath']
+
     for index, instance_config in enumerate(config['instances']):
+        # just +1 because i don t want to use currently the first Instance, @TODO: Check if there are enough instances available
+        instance_name = instance_names[index+1]
         minitouch_port = minitouch_start_port + index
         instance = Instance(
             bluestacks_app_path,
-            bluestacks_config_path,
+            bluestacks_conf_path,
+            bluestacks_sharedFolder_path,
+            instance_name,
             minitouch_port,
             index,
             instance_config,

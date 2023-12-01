@@ -4,9 +4,6 @@ import socket
 host = 'localhost'  # Change this to the IP address or hostname of the server
 port = 9339  # The port you want to connect to
 
-# Data to be sent
-data_to_send = "Moin"
-
 # Create a socket object
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -15,7 +12,7 @@ server_address = (host, port)
 client_socket.connect(server_address)
 
 instance_number = 1
-message = "./test1.png"
+message = "./cv_test/bs/test1.png"
 command_id = 2
 message_bytes = bytes(message, 'utf-8')
 message_length = len(message_bytes)

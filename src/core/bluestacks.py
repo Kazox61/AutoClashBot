@@ -3,43 +3,45 @@ from adbutils import adb, AdbClient, AdbDevice
 from pywinauto.application import Application
 import time
 from logging import getLogger
+import os
+import cv2
+from pathlib import Path
+import numpy as np
+
+remote_sharedFolder_path = "/mnt/windows/BstSharedFolder/"
 
 
 class Bluestacks:
     def __init__(
         self,
         app_path: str,
-        config_path: str,
-        bluestacks_display_name: str
+        conf_path: str,
+        sharedFolder_path: str,
+        instance_name: str
     ) -> None:
         self.app_path = app_path
-        self.config_path = config_path
-        self.bluestacks_display_name = bluestacks_display_name
+        self.conf_path = conf_path
+        self.sharedFolder_path = Path(
+            sharedFolder_path).joinpath(instance_name)
+        self.remote_sharedFolder_path = Path(
+            remote_sharedFolder_path).joinpath(instance_name)
+        self.instance_name = instance_name
 
-    def setup_name(self):
-        with open(self.config_path, 'r') as file:
-            text = file.read()
-            self.installed_image_name = re.search(
-                r"bst\.instance\.([^.]+)\.display_name=\"{}\"".format(
-                    re.escape(self.bluestacks_display_name)),
-                text
-            ).group(1)
-
-    def setup_adb_port(self):
-        with open(self.config_path, 'r') as file:
-            text = file.read()
-            adb_port = re.search(
-                r"bst\.instance\.{}\.status\.adb_port=\"(\d+)\"".format(
-                    re.escape(self.installed_image_name)),
-                text
-            ).group(1)
-            self.adb_port = int(adb_port)
+    def setup(self):
+        os.makedirs(self.sharedFolder_path, exist_ok=True)
+        self.set_config_value("fb_width", "800")
+        self.set_config_value("fb_height", "600")
+        self.set_config_value("dpi", "240")
+        self.set_config_value("show_sidebar", "0")
+        self.set_config_value("display_name", f"acb-{self.instance_name}")
+        self.set_config_value("enable_fps_display", "1")
+        self.set_config_value("google_login_popup_shown", "0")
 
     def start(self) -> (AdbClient, AdbDevice):
-        self.setup_name()
+        self.setup()
         self.start_virtual_device()
         time.sleep(10)
-        self.setup_adb_port()
+        self.adb_port = self.get_config_value("status.adb_port")
 
         self.adb_client = adb
         serial_number = f"localhost:{self.adb_port}"
@@ -49,9 +51,9 @@ class Bluestacks:
 
     def start_virtual_device(self) -> None:
         getLogger("acb.core").info(
-            f"Starting Bluestacks:{self.installed_image_name}")
+            f"Starting Bluestacks:{self.instance_name}")
         self.application = Application().start(
-            f"{self.app_path} --instance {self.installed_image_name}")
+            f"{self.app_path} --instance {self.instance_name}")
 
     def close_virtual_device(self) -> None:
         self.application.kill()
@@ -61,3 +63,42 @@ class Bluestacks:
             'dumpsys window | grep cur= |tr -s " " | cut -d " " -f 4|cut -d "=" -f 2')
         screen_width, screen_height = output.strip().split("x")
         return int(screen_width), int(screen_height)
+
+    def screenshot(self) -> np.ndarray:
+        image_name = "img_temp.png"
+        self.adb_device.shell(
+            f"screencap -p > {self.remote_sharedFolder_path.joinpath(image_name).as_posix()}")
+        image_path = self.sharedFolder_path.joinpath(image_name).as_posix()
+        return cv2.imread(image_path)
+
+    def set_config_value(self, key: str, value: str) -> None:
+        with open(self.conf_path, 'r') as file:
+            text = file.read()
+
+        new_text = re.sub(
+            r"bst\.instance\.{}\.{}=\"([^.]*)\"".format(
+                re.escape(self.instance_name),
+                re.escape(key)
+            ),
+            'bst.instance.{}.{}="{}"'.format(
+                self.instance_name,
+                key,
+                value
+            ),
+            text,
+            1
+        )
+
+        with open(self.conf_path, 'w') as file:
+            file.write(new_text)
+
+    def get_config_value(self, key: str) -> str:
+        with open(self.conf_path, 'r') as file:
+            text = file.read()
+            return re.search(
+                r"bst\.instance\.{}\.{}=\"([^.]*)\"".format(
+                    re.escape(self.instance_name),
+                    re.escape(key),
+                ),
+                text
+            ).group(1)

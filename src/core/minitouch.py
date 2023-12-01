@@ -6,7 +6,7 @@ from adbutils import AdbDevice
 import subprocess
 from utils import add_screen_noise
 
-minitouch_source_path = "../files/minitouch"
+minitouch_source_path = "../files/minitouch/x86/minitouch"
 minitouch_destination_path = "/data/local/tmp"
 
 
@@ -16,6 +16,7 @@ class Minitouch:
         self.minitouch_client: socket.socket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
         self.default_pressure = 50
+        self.logger = getLogger("acb.core")
 
     def setup(self, adb_device: AdbDevice, bluestacks: Bluestacks):
         self.adb_device = adb_device
@@ -31,13 +32,14 @@ class Minitouch:
         return "minitouch" in output
 
     def install(self) -> None:
+        self.logger.debug("Try to push Minitouch File to the Device.")
         self.adb_device.push(minitouch_source_path, minitouch_destination_path)
         self.adb_device.shell(
             f"chmod 755 {minitouch_destination_path}/minitouch")
+        self.logger.debug("Minitouch File pushed to the Device.")
 
     def start_server(self) -> None:
-        logger = getLogger("acb.core")
-        logger.info("MiniTouch starting")
+        self.logger.info("MiniTouch starting")
 
         self.adb_device.forward(
             f"tcp:{self.minitouch_port}", f"localabstract:minitouch_{self.minitouch_port}")
@@ -49,7 +51,7 @@ class Minitouch:
             start_new_session=True
         )
         time.sleep(1)
-        logger.info("MiniTouch Server started")
+        self.logger.info("MiniTouch Server started")
 
         self.minitouch_client.connect(("localhost", self.minitouch_port))
         self.minitouch_client.settimeout(2)
@@ -59,7 +61,7 @@ class Minitouch:
             try:
                 header += self.minitouch_client.recv(4096)
             except self.minitouch_client.timeout:
-                logger.error("minitouch header not recved")
+                self.logger.error("minitouch header not recved")
                 break
             if header.count(b'\n') >= 3:
                 break
@@ -72,7 +74,7 @@ class Minitouch:
         self.max_y = int(minitouch_device_infos[3])
         self.max_pressure = int(minitouch_device_infos[4])
         self.pid = int(lines[2][2:])
-        logger.info(
+        self.logger.info(
             f"Minitouch Client started with Minitouch-Version: {self.minitouch_version}, Pid: {self.pid}, Max-Contacts: {self.max_contacts}, Max-X: {self.max_x}, Max-Y: {self.max_y}, Max-Pressure: {self.max_pressure}")
 
     def send_minitouch_command(self, command: str) -> None:

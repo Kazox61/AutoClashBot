@@ -10,15 +10,17 @@ class Android:
     def __init__(
         self,
         bluestacks_app_path: str,
-        bluestacks_config_path: str,
-        bluestacks_display_name: str,
+        bluestacks_conf_path: str,
+        bluestacks_sharedFolder_path: str,
+        bluestacks_instance_name: str,
         minitouch_port: int
 
     ) -> None:
         self.bluestacks = Bluestacks(
             bluestacks_app_path,
-            bluestacks_config_path,
-            bluestacks_display_name
+            bluestacks_conf_path,
+            bluestacks_sharedFolder_path,
+            bluestacks_instance_name
         )
         self.minitouch = Minitouch(minitouch_port)
 

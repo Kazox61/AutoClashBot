@@ -1,0 +1,4 @@
+enable root on bluestacks to acess shared_prefs => bluestacksConfigPath enable global root and for all instances
+use su to have acess to /data/data/com.supercell.clashofclans/shared_prefs folder -> abd shell su
+
+MyBot shared_prefs: https://github.com/MyBotRun/MyBot/blob/develop/COCBot/functions/Android/Android.au3 line 4646

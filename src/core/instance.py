@@ -13,24 +13,27 @@ class Instance(Thread):
     def __init__(
         self,
         bluestacks_app_path: str,
-        bluestacks_config_path: str,
+        bluestacks_conf_path: str,
+        bluestacks_sharedFolder_path: str,
+        bluestacks_instance_name: str,
         minitouch_port: int,
         instance_index: int,
         instance_config: dict,
         event_emitter: EventEmitter,
     ) -> None:
-        self.bluestacks_display_name = instance_config['bluestacksDisplayName']
+        self.bluestacks_instance_name = bluestacks_instance_name
         self.logger = setup_logger(
-            f"acb.{instance_index}.{self.bluestacks_display_name}",
+            f"acb.{instance_index}.{self.bluestacks_instance_name}",
             os.path.join(
                 __file__,
-                f"../../../logs/{self.bluestacks_display_name}.log"
+                f"../../../logs/{self.bluestacks_instance_name}.log"
             ),
             None,
             logging.DEBUG
         )
         self.bluestacks_app_path = bluestacks_app_path
-        self.bluestacks_config_path = bluestacks_config_path
+        self.bluestacks_conf_path = bluestacks_conf_path
+        self.bluestacks_sharedFolder_path = bluestacks_sharedFolder_path
         self.minitouch_port = minitouch_port
         self.instance_index = instance_index
         self.instance_config = instance_config
@@ -42,8 +45,9 @@ class Instance(Thread):
         time.sleep(self.instance_index * 10)
         self.android = Android(
             self.bluestacks_app_path,
-            self.bluestacks_config_path,
-            self.bluestacks_display_name,
+            self.bluestacks_conf_path,
+            self.bluestacks_sharedFolder_path,
+            self.bluestacks_instance_name,
             self.minitouch_port
         )
         self.android.initialize()
