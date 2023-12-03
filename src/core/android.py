@@ -1,7 +1,7 @@
 from core.bluestacks import Bluestacks
 from core.minitouch import Minitouch
 import numpy as np
-
+import time
 
 package_name = "com.supercell.clashofclans"
 
@@ -39,3 +39,22 @@ class Android:
         open_cv_image = np.array(pillow_image)
         open_cv_image = open_cv_image[:, :, ::-1].copy()
         return open_cv_image
+
+    def zoom_out(self) -> None:
+        max_x, max_y = self.minitouch.screen_size
+        left_finger_point_x, left_finger_point_y = self.minitouch.transform(
+            max_x * 0.1, max_y * 0.5)
+
+        self.minitouch.send_minitouch_command(
+            f"d 1 {left_finger_point_x} {left_finger_point_y} {self.minitouch.default_pressure}\n")
+        self.minitouch.send_minitouch_command("c\n")
+        self.minitouch.swipe_along(
+            [(max_x * 0.9, max_y * 0.5), (max_x * 0.2, max_y * 0.5)],
+            3,
+            20,
+        )
+        self.minitouch.send_minitouch_command("u 1\n")
+        self.minitouch.send_minitouch_command("c\n")
+        time.sleep(0.5)
+        self.minitouch.swipe_along([(int(max_x * 0.2), int(max_y * 0.2)),
+                                    (int(max_x * 0.8), int(max_y * 0.8))])

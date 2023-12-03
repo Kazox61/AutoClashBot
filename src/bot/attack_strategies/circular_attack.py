@@ -14,6 +14,7 @@ class CircularAttack:
         self.button_touch = ButtonTouch(self.android)
 
     def start(self):
+        self.android.zoom_out()
         self.select_troop(0)
         max_x, max_y = self.android.bluestacks.get_screen_size()
         touch_cylce = [

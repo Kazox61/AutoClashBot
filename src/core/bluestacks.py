@@ -58,18 +58,29 @@ class Bluestacks:
     def close_virtual_device(self) -> None:
         self.application.kill()
 
-    def get_screen_size(self) -> None:
+    def get_screen_size(self) -> tuple[int, int]:
         output: str = self.adb_device.shell(
             'dumpsys window | grep cur= |tr -s " " | cut -d " " -f 4|cut -d "=" -f 2')
         screen_width, screen_height = output.strip().split("x")
         return int(screen_width), int(screen_height)
 
-    def screenshot(self) -> np.ndarray:
-        image_name = "img_temp.png"
-        self.adb_device.shell(
-            f"screencap -p > {self.remote_sharedFolder_path.joinpath(image_name).as_posix()}")
-        image_path = self.sharedFolder_path.joinpath(image_name).as_posix()
-        return cv2.imread(image_path)
+    def multi_screenshot(self, amount) -> list[np.ndarray]:
+        image_paths = []
+        images = []
+        start_time = time.time()
+        for i in range(amount):
+            image_name = f"img_temp{i}.png"
+            self.adb_device.shell(
+                f"screencap -p > {self.remote_sharedFolder_path.joinpath(image_name).as_posix()}")
+            image_path = self.sharedFolder_path.joinpath(image_name).as_posix()
+            image_paths.append(image_path)
+
+        print(time.time() - start_time)
+
+        for img_path in image_paths:
+            images.append(cv2.imread(img_path))
+            os.remove(img_path)
+        return images
 
     def set_config_value(self, key: str, value: str) -> None:
         with open(self.conf_path, 'r') as file:

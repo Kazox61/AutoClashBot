@@ -114,7 +114,7 @@ class HomeVillage:
 
     def loop(self) -> None:
         self.force_home_village()
-        self.android.minitouch.zoom_out()
+        self.android.zoom_out()
         time.sleep(1)
         self.try_activate_super_troop()
         self.quick_train()
