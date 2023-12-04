@@ -4,6 +4,7 @@ from core.instance import Instance
 from _logging import setup_logger, logging
 import os
 import re
+from pathlib import Path
 
 
 def get_instance_names(conf_path) -> list[str]:
@@ -29,14 +30,14 @@ if __name__ == "__main__":
 
     instance_names = get_instance_names(config['bluestacksConfPath'])
 
-    bluestacks_app_path = config['bluestacksAppPath']
-    bluestacks_conf_path = config['bluestacksConfPath']
+    bluestacks_app_path = Path(config['bluestacksAppPath'])
+    bluestacks_conf_path = Path(config['bluestacksConfPath'])
+    bluestacks_sharedFolder_path = Path(config['bluestacksSharedFolderPath'])
     minitouch_start_port = config['minitouchStartPort']
-    bluestacks_sharedFolder_path = config['bluestacksSharedFolderPath']
 
     for index, instance_config in enumerate(config['instances']):
         # just +1 because i don t want to use currently the first Instance, @TODO: Check if there are enough instances available
-        instance_name = instance_names[index+1]
+        instance_name = instance_names[index]
         minitouch_port = minitouch_start_port + index
         instance = Instance(
             bluestacks_app_path,

@@ -18,16 +18,17 @@ class CircularAttack:
         self.select_troop(0)
         max_x, max_y = self.android.bluestacks.get_screen_size()
         touch_cylce = [
-            (max_x * 0.5, max_y * 0.05),
-            (max_x * 0.25, max_y * 0.25),
-            (max_x * 0.1, max_y * 0.5),
-            (max_x * 0.25, max_y * 0.75),
-            (max_x * 0.5, max_y * 0.9),
-            (max_x * 0.75, max_y * 0.75),
-            (max_x * 0.9, max_y * 0.5),
-            (max_x * 0.75, max_y * 0.25),
+            (max_x * 0.6, max_y * 0.05),
+            (max_x * 0.35, max_y * 0.25),
+            (max_x * 0.15, max_y * 0.5),
+            (max_x * 0.3, max_y * 0.75),
+            (max_x * 0.6, max_y * 0.95),
+            (max_x * 0.85, max_y * 0.75),
+            (max_x * 0.99, max_y * 0.5),
+            (max_x * 0.85, max_y * 0.25),
         ]
         touches = []
+        touches.extend(touch_cylce)
         touches.extend(touch_cylce)
         touches.extend(touch_cylce)
         touches.extend(touch_cylce)

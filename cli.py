@@ -11,9 +11,9 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = (host, port)
 client_socket.connect(server_address)
 
-instance_number = 1
-message = "./cv_test/bs/test1.png"
-command_id = 2
+instance_number = 0
+message = "Tiny-Flori"
+command_id = 3
 message_bytes = bytes(message, 'utf-8')
 message_length = len(message_bytes)
 version = 1

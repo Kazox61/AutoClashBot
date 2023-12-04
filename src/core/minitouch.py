@@ -51,7 +51,8 @@ class Minitouch:
             start_new_session=True
         )
         time.sleep(1)
-        self.logger.info("MiniTouch Server started")
+        self.logger.info(
+            f"MiniTouch Server started on Port {self.minitouch_port}")
 
         self.minitouch_client.connect(("localhost", self.minitouch_port))
         self.minitouch_client.settimeout(2)

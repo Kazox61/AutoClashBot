@@ -8,34 +8,41 @@ import cv2
 from pathlib import Path
 import numpy as np
 
-remote_sharedFolder_path = "/mnt/windows/BstSharedFolder/"
+remote_sharedFolder_path = Path("/mnt/windows/BstSharedFolder")
+shared_prefs_path = Path("/data/data/com.supercell.clashofclans/shared_prefs")
 
 
 class Bluestacks:
     def __init__(
         self,
-        app_path: str,
-        conf_path: str,
-        sharedFolder_path: str,
+        app_path: Path,
+        conf_path: Path,
+        sharedFolder_path: Path,
         instance_name: str
     ) -> None:
         self.app_path = app_path
         self.conf_path = conf_path
-        self.sharedFolder_path = Path(
-            sharedFolder_path).joinpath(instance_name)
-        self.remote_sharedFolder_path = Path(
-            remote_sharedFolder_path).joinpath(instance_name)
+        self.sharedFolder_path = sharedFolder_path
         self.instance_name = instance_name
 
     def setup(self):
-        os.makedirs(self.sharedFolder_path, exist_ok=True)
-        self.set_config_value("fb_width", "800")
-        self.set_config_value("fb_height", "600")
-        self.set_config_value("dpi", "240")
-        self.set_config_value("show_sidebar", "0")
-        self.set_config_value("display_name", f"acb-{self.instance_name}")
-        self.set_config_value("enable_fps_display", "1")
-        self.set_config_value("google_login_popup_shown", "0")
+
+        os.makedirs(self.sharedFolder_path.as_posix(), exist_ok=True)
+        """
+        self.set_global_config_values({
+            "rooting": "1",
+            "create_desktop_shortcuts": "0"
+        })"""
+        self.set_instance_config_values({
+            "enable_root_access": "1",
+            "fb_width": "800",
+            "fb_height": "600",
+            "dpi": "240",
+            "show_sidebar": "0",
+            "display_name": f"acb-{self.instance_name}",
+            "enable_fps_display": "1",
+            "google_login_popup_shown": "0"
+        })
 
     def start(self) -> (AdbClient, AdbDevice):
         self.setup()
@@ -45,18 +52,19 @@ class Bluestacks:
 
         self.adb_client = adb
         serial_number = f"localhost:{self.adb_port}"
+        self.adb_client.disconnect(serial_number)
+        time.sleep(1)
         self.adb_client.connect(serial_number)
         self.adb_device = self.adb_client.device(serial_number)
+        self.adb_device.root()
+        time.sleep(4)
         return self.adb_client, self.adb_device
 
     def start_virtual_device(self) -> None:
         getLogger("acb.core").info(
             f"Starting Bluestacks:{self.instance_name}")
         self.application = Application().start(
-            f"{self.app_path} --instance {self.instance_name}")
-
-    def close_virtual_device(self) -> None:
-        self.application.kill()
+            f"{self.app_path.as_posix()} --instance {self.instance_name}")
 
     def get_screen_size(self) -> tuple[int, int]:
         output: str = self.adb_device.shell(
@@ -64,47 +72,50 @@ class Bluestacks:
         screen_width, screen_height = output.strip().split("x")
         return int(screen_width), int(screen_height)
 
-    def multi_screenshot(self, amount) -> list[np.ndarray]:
-        image_paths = []
-        images = []
-        start_time = time.time()
-        for i in range(amount):
-            image_name = f"img_temp{i}.png"
-            self.adb_device.shell(
-                f"screencap -p > {self.remote_sharedFolder_path.joinpath(image_name).as_posix()}")
-            image_path = self.sharedFolder_path.joinpath(image_name).as_posix()
-            image_paths.append(image_path)
-
-        print(time.time() - start_time)
-
-        for img_path in image_paths:
-            images.append(cv2.imread(img_path))
-            os.remove(img_path)
-        return images
-
-    def set_config_value(self, key: str, value: str) -> None:
-        with open(self.conf_path, 'r') as file:
+    def set_global_config_values(self, config_values: dict) -> None:
+        with open(self.conf_path.as_posix(), 'r') as file:
             text = file.read()
 
-        new_text = re.sub(
-            r"bst\.instance\.{}\.{}=\"([^.]*)\"".format(
-                re.escape(self.instance_name),
-                re.escape(key)
-            ),
-            'bst.instance.{}.{}="{}"'.format(
-                self.instance_name,
-                key,
-                value
-            ),
-            text,
-            1
-        )
+        for key, value in config_values.items():
+            text = re.sub(
+                r"bst\.{}=\"([^.]*)\"".format(
+                    re.escape(key)
+                ),
+                'bst.{}="{}"'.format(
+                    key,
+                    value
+                ),
+                text,
+                1
+            )
 
-        with open(self.conf_path, 'w') as file:
-            file.write(new_text)
+        with open(self.conf_path.as_posix(), 'w') as file:
+            file.write(text)
+
+    def set_instance_config_values(self, config_values: dict) -> None:
+        with open(self.conf_path.as_posix(), 'r') as file:
+            text = file.read()
+
+        for key, value in config_values.items():
+            text = re.sub(
+                r"bst\.instance\.{}\.{}=\"([^.]*)\"".format(
+                    re.escape(self.instance_name),
+                    re.escape(key)
+                ),
+                'bst.instance.{}.{}="{}"'.format(
+                    self.instance_name,
+                    key,
+                    value
+                ),
+                text,
+                1
+            )
+
+        with open(self.conf_path.as_posix(), 'w') as file:
+            file.write(text)
 
     def get_config_value(self, key: str) -> str:
-        with open(self.conf_path, 'r') as file:
+        with open(self.conf_path.as_posix(), 'r') as file:
             text = file.read()
             return re.search(
                 r"bst\.instance\.{}\.{}=\"([^.]*)\"".format(
@@ -113,3 +124,21 @@ class Bluestacks:
                 ),
                 text
             ).group(1)
+
+    def pull_shared_prefs(self, profile_name: str) -> None:
+        os.makedirs(self.sharedFolder_path.joinpath("acb_profiles").joinpath(
+            profile_name).as_posix(), exist_ok=True)
+        remote_profile_path = remote_sharedFolder_path.joinpath("acb_profiles").joinpath(
+            profile_name).joinpath("shared_prefs")
+        self.adb_device.shell(["su",
+                               "-c",
+                               f"cp -r {shared_prefs_path.as_posix()} {remote_profile_path.as_posix()}"
+                               ])
+
+    def push_shared_prefs(self, profile_name: str) -> None:
+        remote_profile_path = remote_sharedFolder_path.joinpath("acb_profiles").joinpath(
+            profile_name).joinpath("shared_prefs")
+        self.adb_device.shell(["su",
+                               "-c",
+                               f"cp -r {remote_profile_path.as_posix()+'/.'} {shared_prefs_path.as_posix()}"
+                               ])

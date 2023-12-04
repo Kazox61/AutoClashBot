@@ -17,7 +17,8 @@ template_supertroop_lab_inactive = cv2.imread(os.path.join(
 
 
 class HomeVillage:
-    def __init__(self, logger: Logger, android: Android):
+    def __init__(self, bot, logger: Logger, android: Android):
+        self.bot = bot
         self.logger = logger
         self.android: Android = android
         self.building_detector = YoloDetector(
@@ -57,7 +58,7 @@ class HomeVillage:
         time.sleep(8)
         if self.is_in_home_village():
             return
-        self.android.bluestacks.close_virtual_device()
+        self.android.kill()
         time.sleep(5)
         self.android.initialize()
         self.logger.info("Start Clash of Clans App")
@@ -120,6 +121,9 @@ class HomeVillage:
         self.quick_train()
         while not self.is_army_ready():
             self.quick_train()
+            success = self.bot.try_switch_next_account()
+            if success:
+                return
             time.sleep(20)
         search_result = self.dead_base_searcher.search()
         self.logger.info(f"Attacking base with {search_result}!")

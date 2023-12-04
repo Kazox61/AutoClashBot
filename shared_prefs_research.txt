@@ -2,3 +2,10 @@ enable root on bluestacks to acess shared_prefs => bluestacksConfigPath enable g
 use su to have acess to /data/data/com.supercell.clashofclans/shared_prefs folder -> abd shell su
 
 MyBot shared_prefs: https://github.com/MyBotRun/MyBot/blob/develop/COCBot/functions/Android/Android.au3 line 4646
+
+You can use this command to copy all:
+cp -r /mnt/windows/BstSharedFolder/shared_prefs/. /data/data/com.supercell.clashofclans/shared_prefs
+
+possible ids stored:
+__hs_lite_sdk_store.xml -> "active_user"
+IdProfiles.xml

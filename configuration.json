@@ -4,5 +4,23 @@
   "bluestacksInstanceConfPath": "C:/ProgramData/BlueStacks_nxt/Engine/$instanceName/$instanceName.bstk",
   "bluestacksSharedFolderPath": "C:/ProgramData/BlueStacks_nxt/Engine/UserData/SharedFolder",
   "minitouchStartPort": 58800,
-  "instances": [{}, {}]
+  "instances": [{
+    "profiles": [
+      "TinyFlori"
+    ]
+  }, 
+  {
+    "profiles": [
+      "MiniFlori"
+    ]
+  },
+  {
+    "profiles": [
+      "TSS",
+      "MaxedSoon",
+      "Mindistor",
+      "Florinho"
+    ]
+  }
+]
 }

@@ -7,14 +7,15 @@ import time
 import cv2
 from _logging import setup_logger, logging
 import os
+from pathlib import Path
 
 
 class Instance(Thread):
     def __init__(
         self,
-        bluestacks_app_path: str,
-        bluestacks_conf_path: str,
-        bluestacks_sharedFolder_path: str,
+        bluestacks_app_path: Path,
+        bluestacks_conf_path: Path,
+        bluestacks_sharedFolder_path: Path,
         bluestacks_instance_name: str,
         minitouch_port: int,
         instance_index: int,
@@ -51,7 +52,10 @@ class Instance(Thread):
             self.minitouch_port
         )
         self.android.initialize()
-        self.bot = Bot(self.logger, self.android)
+        self.bot = Bot(self.logger,
+                       self.android,
+                       self.instance_config["profiles"]
+                       )
         self.bot.run()
 
     def init_events(self) -> None:
@@ -63,10 +67,18 @@ class Instance(Thread):
             f"{self.instance_index}:{Commands.Screenshot.value}",
             self.on_screenshot
         )
+        self.event_emitter.on(
+            f"{self.instance_index}:{Commands.PullSharedPrefs.value}",
+            self.on_pull_shared_prefs
+        )
 
     def on_close_instance(self, _) -> None:
         print("Shutdown")
 
-    def on_screenshot(self, path) -> None:
+    def on_screenshot(self, path: str) -> None:
         screenshot = self.android.get_screenshot()
         cv2.imwrite(path, screenshot)
+
+    def on_pull_shared_prefs(self, profile_name: str) -> None:
+        self.logger.info(f"Pushing shared_prefs for {profile_name}")
+        self.android.bluestacks.pull_shared_prefs(profile_name)

@@ -2,6 +2,7 @@ from core.bluestacks import Bluestacks
 from core.minitouch import Minitouch
 import numpy as np
 import time
+from pathlib import Path
 
 package_name = "com.supercell.clashofclans"
 
@@ -9,9 +10,9 @@ package_name = "com.supercell.clashofclans"
 class Android:
     def __init__(
         self,
-        bluestacks_app_path: str,
-        bluestacks_conf_path: str,
-        bluestacks_sharedFolder_path: str,
+        bluestacks_app_path: Path,
+        bluestacks_conf_path: Path,
+        bluestacks_sharedFolder_path: Path,
         bluestacks_instance_name: str,
         minitouch_port: int
 
@@ -33,6 +34,10 @@ class Android:
 
     def stop_app(self):
         self.adb_device.shell(f"am force-stop {package_name}")
+
+    def kill(self) -> None:
+        self.minitouch.minitouch_client.close()
+        self.bluestacks.application.kill()
 
     def get_screenshot(self) -> np.ndarray:
         pillow_image = self.adb_device.screenshot().convert("RGB")

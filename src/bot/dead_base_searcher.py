@@ -1,7 +1,7 @@
 from core.android import Android
 from cv.yolo_detector import YoloDetector, DetectorResult
 from cv.yolo_classifier import YoloClassifier
-from cv.text_finder import TextFinder, convert_to_int
+from cv.text_finder import TextFinder
 import time
 from difflib import SequenceMatcher
 from logging import Logger
@@ -73,28 +73,20 @@ class DeadBaseSearcher:
         time.sleep(1)
         self.button_touch.try_press(Buttons.FindAMatch)
 
-    def find_available_loot(self, screen_shot) -> [int, int, int]:
+    def find_available_loot(self, screen_shot) -> tuple[int, int, int]:
         height, width, _ = screen_shot.shape
         cropped = screen_shot[0: int(height * 0.3), int(0):int(width * 0.3)]
-        result = self.text_finder.find_all(cropped)
+        available_loot = self.text_finder.find(cropped, "available loot", 0.75)
+        if available_loot is None:
+            return None, None, None
+        result = self.text_finder.find_all(cropped, allowlist='0123456789 ')
         values = [(key, value) for key, value in result.items()]
 
         loot = []
-        loot_index = None
-        for index, (key, coords) in enumerate(values):
-            sm = SequenceMatcher(a="Available Loot", b=key)
-            if sm.ratio() > 0.8:
-                loot_index = index
-                continue
-            if not loot_index:
-                continue
-            if index == loot_index + 1:
-                loot.append(convert_to_int(key))
-            if index == loot_index + 2:
-                loot.append(convert_to_int(key))
-            if index == loot_index + 3:
-                loot.append(convert_to_int(key))
-        return loot
+        for key, coords in values:
+            if coords[1] > available_loot[1]:
+                loot.append(int(key.replace(" ", "")))
+        return loot[0] if len(loot) > 0 else None, loot[1] if len(loot) > 1 else None, loot[2] if len(loot) > 2 else None
 
     def validate(self, image) -> int:
         results: list[DetectorResult] = self.building_detector.predict(image)
