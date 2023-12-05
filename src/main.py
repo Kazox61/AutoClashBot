@@ -5,7 +5,6 @@ from _logging import setup_logger, logging
 import os
 import re
 from pathlib import Path
-from adbutils import adb
 
 
 def get_instance_names(conf_path) -> list[str]:
@@ -23,7 +22,7 @@ if __name__ == "__main__":
         None,
         logging.DEBUG
     )
-    adb.server_kill()
+
     server = ServerThread("localhost", 9339)
     server.start()
 
@@ -37,7 +36,6 @@ if __name__ == "__main__":
     minitouch_start_port = config['minitouchStartPort']
 
     for index, instance_config in enumerate(config['instances']):
-        # just +1 because i don t want to use currently the first Instance, @TODO: Check if there are enough instances available
         instance_name = instance_names[index]
         minitouch_port = minitouch_start_port + index
         instance = Instance(
