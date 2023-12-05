@@ -14,7 +14,7 @@ class CircularAttack:
         self.button_touch = ButtonTouch(self.android)
 
     def start(self):
-        self.android.zoom_out()
+        self.zoom_out()
         self.select_troop(0)
         max_x, max_y = self.android.bluestacks.get_screen_size()
         touch_cylce = [
@@ -23,9 +23,9 @@ class CircularAttack:
             (max_x * 0.15, max_y * 0.5),
             (max_x * 0.3, max_y * 0.75),
             (max_x * 0.6, max_y * 0.95),
-            (max_x * 0.85, max_y * 0.75),
+            (max_x * 0.82, max_y * 0.72),
             (max_x * 0.99, max_y * 0.5),
-            (max_x * 0.85, max_y * 0.25),
+            (max_x * 0.82, max_y * 0.27),
         ]
         touches = []
         touches.extend(touch_cylce)
@@ -63,3 +63,12 @@ class CircularAttack:
         time.sleep(2)
         self.button_touch.try_press(Buttons.ReturnHome)
         time.sleep(5)
+
+    def zoom_out(self) -> None:
+        x, y = self.android.bluestacks.get_screen_size()
+        center_y = y * 0.5
+        self.android.minitouch.two_finger_swipe(
+            (x*0.1, center_y), (x*0.45, center_y), (x*0.9, center_y), (x*0.55, center_y), 2, 5)
+        time.sleep(0.5)
+        self.android.minitouch.swipe_along([(int(x * 0.2), int(y * 0.2)),
+                                            (int(x * 0.8), int(y * 0.8))])

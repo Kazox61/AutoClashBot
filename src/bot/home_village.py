@@ -101,10 +101,19 @@ class HomeVillage:
         time.sleep(0.5)
         return found_text is None
 
+    def zoom_out(self) -> None:
+        x, y = self.android.bluestacks.get_screen_size()
+        center_y = y * 0.5
+        self.android.minitouch.two_finger_swipe(
+            (x*0.1, center_y), (x*0.45, center_y), (x*0.9, center_y), (x*0.55, center_y), 2, 5)
+        time.sleep(0.5)
+        self.android.minitouch.swipe_along([(int(x * 0.2), int(y * 0.2)),
+                                            (int(x * 0.8), int(y * 0.8))])
+
     def run(self) -> None:
         while True:
             self.force_home_village()
-            self.android.zoom_out()
+            self.zoom_out()
             time.sleep(1)
             self.try_activate_super_troop()
             self.quick_train()
