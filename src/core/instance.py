@@ -1,6 +1,6 @@
 from pymitter import EventEmitter
 from threading import Thread
-from bot.bot import Bot
+from bot.village_handler import VillageHandler
 from core.android import Android
 from config.commands import Commands
 import time
@@ -52,11 +52,11 @@ class Instance(Thread):
             self.minitouch_port
         )
         self.android.initialize()
-        self.bot = Bot(self.logger,
-                       self.android,
-                       self.instance_config["profiles"]
-                       )
-        self.bot.run()
+        self.village_handler = VillageHandler(self.logger,
+                                              self.android,
+                                              self.instance_config["profiles"]
+                                              )
+        self.village_handler.run()
 
     def init_events(self) -> None:
         self.event_emitter.on(

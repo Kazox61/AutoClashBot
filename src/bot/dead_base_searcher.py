@@ -47,7 +47,6 @@ class DeadBaseSearcher:
                 img = self.android.get_screenshot()
 
                 while self.text_finder.find(img, "searching for opponent", 0.5) is not None:
-                    time.sleep(2)
                     img = self.android.get_screenshot()
 
                 resources = self.find_available_loot(img)
@@ -89,8 +88,12 @@ class DeadBaseSearcher:
         return loot[0] if len(loot) > 0 else None, loot[1] if len(loot) > 1 else None, loot[2] if len(loot) > 2 else None
 
     def validate(self, image) -> int:
+        start_time = time.time()
         results: list[DetectorResult] = self.building_detector.predict(image)
+        self.logger.debug(
+            f"It took {time.time() - start_time} to predict the buildings")
         val = 0
+        start_time = time.time()
         for result in results:
             if result.cls != 24:
                 continue
@@ -106,4 +109,6 @@ class DeadBaseSearcher:
                 val += 2
             elif name == 'MostlyEC' or name == 'FullEC':
                 val += 3
+        self.logger.debug(
+            f"It took {time.time() - start_time} to classify the collectors")
         return val

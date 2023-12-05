@@ -12,8 +12,8 @@ server_address = (host, port)
 client_socket.connect(server_address)
 
 instance_number = 0
-message = "Tiny-Flori"
-command_id = 3
+message = "ss.png"
+command_id = 2
 message_bytes = bytes(message, 'utf-8')
 message_length = len(message_bytes)
 version = 1

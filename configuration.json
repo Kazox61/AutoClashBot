@@ -6,19 +6,15 @@
   "minitouchStartPort": 58800,
   "instances": [{
     "profiles": [
-      "TinyFlori"
+      "Flori",
+      "MiniFlori"
     ]
   }, 
   {
     "profiles": [
-      "MiniFlori"
-    ]
-  },
-  {
-    "profiles": [
+      "TinyFlori",
       "TSS",
       "MaxedSoon",
-      "Mindistor",
       "Florinho"
     ]
   }

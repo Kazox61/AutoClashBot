@@ -1,6 +1,6 @@
 from core.android import Android
-from cv.text_finder import TextFinder
 from logging import Logger
+from cv.text_finder import TextFinder
 from bot.attack_strategies.circular_attack import CircularAttack
 from cv.yolo_detector import YoloDetector
 from bot.dead_base_searcher import DeadBaseSearcher
@@ -17,8 +17,7 @@ template_supertroop_lab_inactive = cv2.imread(os.path.join(
 
 
 class HomeVillage:
-    def __init__(self, bot, logger: Logger, android: Android):
-        self.bot = bot
+    def __init__(self, logger: Logger, android: Android):
         self.logger = logger
         self.android: Android = android
         self.building_detector = YoloDetector(
@@ -55,18 +54,7 @@ class HomeVillage:
         self.android.stop_app()
         time.sleep(2)
         self.android.start_app()
-        time.sleep(8)
-        if self.is_in_home_village():
-            return
-        self.android.kill()
-        time.sleep(5)
-        self.android.initialize()
-        self.logger.info("Start Clash of Clans App")
-        self.android.start_app()
         time.sleep(10)
-        if self.is_in_home_village():
-            return
-        self.logger.error("Can't force to go to the HomeVillage")
 
     def try_activate_super_troop(self) -> bool:
         result = template_matching(self.android.get_screenshot(),
@@ -113,18 +101,15 @@ class HomeVillage:
         time.sleep(0.5)
         return found_text is None
 
-    def loop(self) -> None:
-        self.force_home_village()
-        self.android.zoom_out()
-        time.sleep(1)
-        self.try_activate_super_troop()
-        self.quick_train()
-        while not self.is_army_ready():
+    def run(self) -> None:
+        while True:
+            self.force_home_village()
+            self.android.zoom_out()
+            time.sleep(1)
+            self.try_activate_super_troop()
             self.quick_train()
-            success = self.bot.try_switch_next_account()
-            if success:
+            if not self.is_army_ready():
                 return
-            time.sleep(20)
-        search_result = self.dead_base_searcher.search()
-        self.logger.info(f"Attacking base with {search_result}!")
-        self.circular_attack.start()
+            search_result = self.dead_base_searcher.search()
+            self.logger.info(f"Attacking base with {search_result}!")
+            self.circular_attack.start()

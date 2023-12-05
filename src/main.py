@@ -5,6 +5,7 @@ from _logging import setup_logger, logging
 import os
 import re
 from pathlib import Path
+from adbutils import adb
 
 
 def get_instance_names(conf_path) -> list[str]:
@@ -22,7 +23,7 @@ if __name__ == "__main__":
         None,
         logging.DEBUG
     )
-
+    adb.server_kill()
     server = ServerThread("localhost", 9339)
     server.start()
 
