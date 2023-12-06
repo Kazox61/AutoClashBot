@@ -7,9 +7,9 @@
 - [x] Activate Super Troops
 - [ ] Donate Troops
 - [ ] Play Clan Games
-- [ ] Collect Resources
+- [x] Collect Resources
 - [ ] Update Buildings
 - [ ] Remove Obstacles
 - [ ] Switch Accounts
-- [ ] Switch Villages
+- [x] Switch Villages
 - [ ] Attack in Night Village

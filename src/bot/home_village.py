@@ -101,6 +101,37 @@ class HomeVillage:
         time.sleep(0.5)
         return found_text is None
 
+    def collect_resources(self) -> None:
+        self.logger.debug("Collect Resources")
+        max_x, max_y = self.android.bluestacks.get_screen_size()
+        buildings = self.building_detector.predict(
+            self.android.get_screenshot())
+        collected_gold = False
+        collected_elixir = False
+        collected_dark_elixir = False
+        for builing in buildings:
+            if builing.name == 'Gold Mine' and not collected_gold:
+                collected_gold = True
+                self.android.minitouch.touch(max_x * 0.99, max_y * 0.5)
+                time.sleep(0.5)
+                self.android.minitouch.touch(builing.xywh[0], builing.xywh[1])
+                time.sleep(0.5)
+            if builing.name == 'Elixir Collector' and not collected_elixir:
+                collected_elixir = True
+                self.android.minitouch.touch(max_x * 0.99, max_y * 0.5)
+                time.sleep(0.5)
+                self.android.minitouch.touch(builing.xywh[0], builing.xywh[1])
+                time.sleep(0.5)
+            if builing.name == 'Dark Elixir Drill' and not collected_dark_elixir:
+                collected_dark_elixir = True
+                self.android.minitouch.touch(max_x * 0.99, max_y * 0.5)
+                time.sleep(0.5)
+                self.android.minitouch.touch(builing.xywh[0], builing.xywh[1])
+                time.sleep(0.5)
+
+            if collected_gold and collected_elixir and collected_dark_elixir:
+                break
+
     def zoom_out(self) -> None:
         x, y = self.android.bluestacks.get_screen_size()
         center_y = y * 0.5
@@ -115,6 +146,7 @@ class HomeVillage:
             self.force_home_village()
             self.zoom_out()
             time.sleep(1)
+            self.collect_resources()
             self.try_activate_super_troop()
             self.quick_train()
             if not self.is_army_ready():
