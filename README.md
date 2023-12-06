@@ -10,6 +10,6 @@
 - [x] Collect Resources
 - [ ] Update Buildings
 - [ ] Remove Obstacles
-- [ ] Switch Accounts
-- [x] Switch Villages
+- [x] Switch Accounts
+- [x] Switch Villages/Game Mode
 - [ ] Attack in Night Village
