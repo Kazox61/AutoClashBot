@@ -10,6 +10,7 @@ from bot.utils.button_touch import ButtonTouch
 import os
 from cv.extensions import template_matching
 import cv2
+from difflib import SequenceMatcher
 
 
 template_supertroop_lab_inactive = cv2.imread(os.path.join(
@@ -47,6 +48,7 @@ class HomeVillage:
     def force_home_village(self) -> None:
         if self.is_in_home_village():
             return
+        self.try_handle_daily_reward_screen()
         self.button_touch.try_press(Buttons.Close)
         time.sleep(0.5)
         if self.is_in_home_village():
@@ -56,13 +58,36 @@ class HomeVillage:
         self.android.start_app()
         time.sleep(10)
 
+    def try_handle_daily_reward_screen(self) -> None:
+        is_daily_reward_screen = False
+        all_text = self.text_finder.find_all(self.android.get_screenshot())
+        for text, position in all_text.items():
+            sm1 = SequenceMatcher(a=text.lower(), b='dailiy reward!')
+            sm2 = SequenceMatcher(
+                a=text.lower(), b='log in daily to collect rewards!')
+            if sm1.ratio() > 0.7 or sm2.ratio() > 0.7:
+                is_daily_reward_screen = True
+
+        if not is_daily_reward_screen:
+            return
+
+        for text, position in all_text.items():
+            sm = SequenceMatcher(a=text.lower(), b='claim')
+            if sm.ratio() > 0.6:
+                self.android.minitouch.touch(position[0], position[1])
+                self.logger.info("Claimed daily reward")
+                time.sleep(0.5)
+                self.button_touch.try_press(Buttons.Close)
+                break
+        self.logger.warning(
+            "Found daily reward screen, but can't find claim button!")
+
     def try_activate_super_troop(self) -> bool:
         result = template_matching(self.android.get_screenshot(),
                                    template_supertroop_lab_inactive, 0.7)
 
         if result is None:
             return False
-
         super_barbs = (180, 330)
         activate = (580, 490)
         activate_confirm = (390, 410)
@@ -77,6 +102,7 @@ class HomeVillage:
         time.sleep(1)
         self.android.minitouch.touch(close_button[0], close_button[1])
         time.sleep(1)
+        self.logger.info(f"Activated Super Troop")
         return True
 
     def quick_train(self) -> None:
@@ -151,6 +177,13 @@ class HomeVillage:
             self.quick_train()
             if not self.is_army_ready():
                 return
+            self.logger.info("Army is ready. Start to search for dead base")
             search_result = self.dead_base_searcher.search()
+            # is in a deadlock (not in clounds and no opponents)
+            if search_result is None:
+                self.android.stop_app()
+                self.logger.warning(
+                    "Not in clouds or has opponent. Stop searching. Force HomeVillage!")
+                continue
             self.logger.info(f"Attacking base with {search_result}!")
             self.circular_attack.start()

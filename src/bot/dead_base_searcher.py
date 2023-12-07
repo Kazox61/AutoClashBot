@@ -3,7 +3,6 @@ from cv.yolo_detector import YoloDetector, DetectorResult
 from cv.yolo_classifier import YoloClassifier
 from cv.text_finder import TextFinder
 import time
-from difflib import SequenceMatcher
 from logging import Logger
 from config.buttons import Buttons
 from bot.utils.button_touch import ButtonTouch
@@ -36,7 +35,7 @@ class DeadBaseSearcher:
         self.collector_classifier = YoloClassifier(
             os.path.join(__file__, "../../../assets/or_models/collector_classifier_model.pt"))
 
-    def search(self) -> None:
+    def search(self) -> SearchResult | None:
         start_time = time.time()
         self.start_search()
         iterations = 0
@@ -49,7 +48,23 @@ class DeadBaseSearcher:
                 while self.text_finder.find(img, "searching for opponent", 0.5) is not None:
                     img = self.android.get_screenshot()
 
-                resources = self.find_available_loot(img)
+                # execute it twice because it s possible that screen switches from clouds to opponents and both text could not exist
+                for _ in range(2):
+                    img = self.android.get_screenshot()
+                    height, width, _ = img.shape
+                    cropped = img[0: int(height * 0.3),
+                                  int(0):int(width * 0.3)]
+                    available_loot_text_position = self.text_finder.find(
+                        cropped, "available loot", 0.75)
+                    if available_loot_text_position:
+                        break
+
+                if not available_loot_text_position:
+                    # currently not in clounds and dont have a opponent => return
+                    return None
+
+                resources = self.find_available_loot(
+                    cropped, available_loot_text_position)
 
                 val = self.validate(img)
                 if val >= 10:
@@ -72,18 +87,19 @@ class DeadBaseSearcher:
         time.sleep(1)
         self.button_touch.try_press(Buttons.FindAMatch)
 
-    def find_available_loot(self, screen_shot) -> tuple[int, int, int]:
-        height, width, _ = screen_shot.shape
-        cropped = screen_shot[0: int(height * 0.3), int(0):int(width * 0.3)]
-        available_loot = self.text_finder.find(cropped, "available loot", 0.75)
-        if available_loot is None:
+    def find_available_loot(self, cropped_img, available_loot_text_position=None) -> tuple[int, int, int]:
+        if available_loot_text_position is None:
+            available_loot_text_position = self.text_finder.find(
+                cropped_img, "available loot", 0.75)
+        if available_loot_text_position is None:
             return None, None, None
-        result = self.text_finder.find_all(cropped, allowlist='0123456789 ')
+        result = self.text_finder.find_all(
+            cropped_img, allowlist='0123456789 ')
         values = [(key, value) for key, value in result.items()]
 
         loot = []
         for key, coords in values:
-            if coords[1] > available_loot[1]:
+            if coords[1] > available_loot_text_position[1]:
                 loot.append(int(key.replace(" ", "")))
         return loot[0] if len(loot) > 0 else None, loot[1] if len(loot) > 1 else None, loot[2] if len(loot) > 2 else None
 
