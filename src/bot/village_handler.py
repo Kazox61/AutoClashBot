@@ -1,8 +1,10 @@
 from core.android import Android
 from logging import Logger
-from bot.home_village import HomeVillage
+from cv.text_finder import TextFinder
+from cv.yolo_detector import YoloDetector
 from bot.village import Village
 import time
+import os
 
 
 class VillageHandler:
@@ -10,10 +12,14 @@ class VillageHandler:
         self.logger = logger
         self.android = android
         self.profile_names = profile_names
-
+        self.current_account_index = 0
         self.villages: list[Village] = []
+        building_detector = YoloDetector(
+            os.path.join(__file__, "../../../assets/or_models/building_detector_model.pt"), 0.7)
+        text_finder = TextFinder()
         for profile_name in profile_names:
-            village = Village(profile_name, logger, android)
+            village = Village(profile_name, logger, android,
+                              building_detector, text_finder)
             self.villages.append(village)
 
     def switch_account(self, profile_name: str) -> None:
@@ -36,13 +42,13 @@ class VillageHandler:
             self.villages[self.current_account_index].profile_name)
         return True
 
-    def run(self) -> None:
-        self.current_account_index = 0
+    async def run(self) -> None:
+        print("RUN VILLAGE HANDLER")
         self.active_village = self.villages[self.current_account_index]
         self.switch_account(self.active_village.profile_name)
 
         while True:
-            self.active_village.run()
+            await self.active_village.run()
             switched = self.try_switch_next_account()
             if not switched:
                 time.sleep(10)

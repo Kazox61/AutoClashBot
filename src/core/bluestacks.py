@@ -4,10 +4,8 @@ from pywinauto.application import Application
 import time
 from logging import getLogger
 import os
-import cv2
 from pathlib import Path
-import numpy as np
-
+import subprocess
 remote_sharedFolder_path = Path("/mnt/windows/BstSharedFolder")
 shared_prefs_path = Path("/data/data/com.supercell.clashofclans/shared_prefs")
 
@@ -24,6 +22,7 @@ class Bluestacks:
         self.conf_path = conf_path
         self.sharedFolder_path = sharedFolder_path
         self.instance_name = instance_name
+        self.window_title = f"acb-{instance_name}"
 
     def setup(self):
 
@@ -39,7 +38,7 @@ class Bluestacks:
             "fb_height": "600",
             "dpi": "240",
             "show_sidebar": "0",
-            "display_name": f"acb-{self.instance_name}",
+            "display_name": self.window_title,
             "enable_fps_display": "1",
             "google_login_popup_shown": "0"
         })
@@ -65,6 +64,13 @@ class Bluestacks:
             f"Starting Bluestacks:{self.instance_name}")
         self.application = Application().start(
             f"{self.app_path.as_posix()} --instance {self.instance_name}")
+
+    def close_instance(self) -> None:
+        subprocess.run(
+            f'taskkill /fi "WINDOWTITLE eq {self.window_title}" /IM "HD-Player.exe" /F',
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
 
     def get_screen_size(self) -> tuple[int, int]:
         output: str = self.adb_device.shell(

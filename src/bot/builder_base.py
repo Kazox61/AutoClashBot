@@ -15,12 +15,12 @@ template_ranking_icon = cv2.imread(
 
 
 class BuilderBase:
-    def __init__(self, logger: Logger, android: Android) -> None:
+    def __init__(self, logger: Logger, android: Android, text_finder: TextFinder) -> None:
         self.logger = logger
         self.android: Android = android
         self.builder_base_attack = BuilderBaseAttack(android)
         self.button_touch = ButtonTouch(android)
-        self.text_finder = TextFinder()
+        self.text_finder = text_finder
 
     def is_in_builder_base(self) -> bool:
         img = self.android.get_screenshot()

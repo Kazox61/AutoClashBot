@@ -1,13 +1,16 @@
 from core.bluestacks import Bluestacks
 from core.minitouch import Minitouch
 import numpy as np
-import time
 from pathlib import Path
+from adbutils import AdbClient, AdbDevice
 
 package_name = "com.supercell.clashofclans"
 
 
 class Android:
+    adb_client: AdbClient
+    adb_device: AdbDevice
+
     def __init__(
         self,
         bluestacks_app_path: Path,
@@ -37,7 +40,10 @@ class Android:
 
     def kill(self) -> None:
         self.minitouch.minitouch_client.close()
-        self.bluestacks.application.kill()
+        print(self.adb_device.shell(
+            f"kill {self.minitouch.pid}"))
+        # adb forward --remove <local> -> function not available in adbutils
+        self.bluestacks.close_instance()
 
     def get_screenshot(self) -> np.ndarray:
         pillow_image = self.adb_device.screenshot().convert("RGB")

@@ -1,8 +1,8 @@
 from core.android import Android
 from logging import Logger
+from cv.yolo_detector import YoloDetector
 from cv.text_finder import TextFinder
 from bot.attack_strategies.circular_attack import CircularAttack
-from cv.yolo_detector import YoloDetector
 from bot.dead_base_searcher import DeadBaseSearcher
 import time
 from config.buttons import Buttons
@@ -11,6 +11,7 @@ import os
 from cv.extensions import template_matching
 import cv2
 from difflib import SequenceMatcher
+import asyncio
 
 
 template_supertroop_lab_inactive = cv2.imread(os.path.join(
@@ -18,12 +19,17 @@ template_supertroop_lab_inactive = cv2.imread(os.path.join(
 
 
 class HomeVillage:
-    def __init__(self, logger: Logger, android: Android):
+    def __init__(
+        self,
+        logger: Logger,
+        android: Android,
+        building_detector: YoloDetector,
+        text_finder: TextFinder,
+    ):
         self.logger = logger
         self.android: Android = android
-        self.building_detector = YoloDetector(
-            os.path.join(__file__, "../../../assets/or_models/building_detector_model.pt"), 0.7)
-        self.text_finder = TextFinder()
+        self.building_detector = building_detector
+        self.text_finder = text_finder
         self.button_touch = ButtonTouch(self.android)
 
         self.dead_base_searcher = DeadBaseSearcher(
@@ -105,6 +111,15 @@ class HomeVillage:
         self.logger.info(f"Activated Super Troop")
         return True
 
+    def activate_super_troops(self):
+        activate = (580, 490)
+        activate_confirm = (390, 410)
+        self.android.minitouch.touch(activate[0], activate[1])
+        time.sleep(1)
+        self.android.minitouch.touch(activate_confirm[0], activate_confirm[1])
+        time.sleep(1)
+        self.logger.info(f"Activated Super Troop")
+
     def quick_train(self) -> None:
         self.button_touch.try_press(Buttons.TrainAll)
         time.sleep(0.5)
@@ -112,6 +127,15 @@ class HomeVillage:
         time.sleep(0.5)
         self.button_touch.try_press(Buttons.TrainArmy1)
         time.sleep(1)
+        if self.text_finder.find(self.android.get_screenshot(), "Missing Super Troop boosts For the Following units: Super Barbarian", 0.7, True):
+            self.android.minitouch.touch(480, 360)
+            time.sleep(1)
+            self.activate_super_troops()
+            self.quick_train()
+            return
+        if self.text_finder.find(self.android.get_screenshot(), "Not enough room For all specified units. Do you want to train the army partially, anyway", 0.7, True):
+            self.android.minitouch.touch(480, 360)
+            time.sleep(0.5)
         self.button_touch.try_press(Buttons.Close)
         time.sleep(0.5)
 
@@ -167,20 +191,24 @@ class HomeVillage:
         self.android.minitouch.swipe_along([(int(x * 0.2), int(y * 0.2)),
                                             (int(x * 0.8), int(y * 0.8))])
 
-    def run(self) -> None:
+    async def run(self) -> None:
         while True:
             self.force_home_village()
+            await asyncio.sleep(1)
             self.zoom_out()
-            time.sleep(1)
+            await asyncio.sleep(1)
             self.collect_resources()
-            self.try_activate_super_troop()
+            await asyncio.sleep(1)
+            # self.try_activate_super_troop() #integrated in the quick_train function
+            # await asyncio.sleep(1)
             self.quick_train()
             if not self.is_army_ready():
                 return
+            await asyncio.sleep(1)
             self.logger.info("Army is ready. Start to search for dead base")
             search_result = self.dead_base_searcher.search()
-            # is in a deadlock (not in clounds and no opponents)
             if search_result is None:
+                # is in a deadlock (not in clounds and no opponents)
                 self.android.stop_app()
                 self.logger.warning(
                     "Not in clouds or has opponent. Stop searching. Force HomeVillage!")

@@ -3,11 +3,20 @@ from threading import Thread
 from bot.village_handler import VillageHandler
 from core.android import Android
 from config.commands import Commands
-import time
 import cv2
 from _logging import setup_logger, logging
 import os
 from pathlib import Path
+import asyncio
+import time
+from enum import Enum
+
+
+class InstanceStatus(Enum):
+    Closed = 0
+    Starting = 1
+    Running = 2
+    Stopped = 3
 
 
 class Instance(Thread):
@@ -22,6 +31,7 @@ class Instance(Thread):
         instance_config: dict,
         event_emitter: EventEmitter,
     ) -> None:
+        self.instance_status = InstanceStatus.Stopped
         self.bluestacks_instance_name = bluestacks_instance_name
         self.logger = setup_logger(
             f"acb.{instance_index}.{self.bluestacks_instance_name}",
@@ -43,7 +53,7 @@ class Instance(Thread):
         Thread.__init__(self)
 
     def run(self) -> None:
-        time.sleep(self.instance_index * 10)
+        self.instance_status = InstanceStatus.Starting
         self.android = Android(
             self.bluestacks_app_path,
             self.bluestacks_conf_path,
@@ -56,12 +66,30 @@ class Instance(Thread):
                                               self.android,
                                               self.instance_config["profiles"]
                                               )
-        self.village_handler.run()
+
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        coroutine = self.village_handler.run()
+        self.future = asyncio.run_coroutine_threadsafe(coroutine, self.loop)
+        self.instance_status = InstanceStatus.Running
+        self.loop.run_forever()
 
     def init_events(self) -> None:
         self.event_emitter.on(
             f"{self.instance_index}:{Commands.CloseInstance.value}",
             self.on_close_instance
+        )
+        self.event_emitter.on(
+            f"{self.instance_index}:{Commands.RestartInstance.value}",
+            self.on_restart_instance
+        )
+        self.event_emitter.on(
+            f"{self.instance_index}:{Commands.StopInstance.value}",
+            self.on_stop_instance
+        )
+        self.event_emitter.on(
+            f"{self.instance_index}:{Commands.ResumeInstance.value}",
+            self.on_resume_instance
         )
         self.event_emitter.on(
             f"{self.instance_index}:{Commands.Screenshot.value}",
@@ -72,8 +100,59 @@ class Instance(Thread):
             self.on_pull_shared_prefs
         )
 
-    def on_close_instance(self, _) -> None:
-        print("Shutdown")
+    async def on_close_instance(self, _) -> None:
+        if self.instance_status == InstanceStatus.Closed or self.instance_status:
+            return
+        self.logger.info("Close Instance")
+        self.future.cancel()
+        try:
+            await self.future.result()
+        except Exception:
+            self.android.kill()
+            time.sleep(1)
+            self.loop.stop()
+            self.instance_status = InstanceStatus.Closed
+
+    async def on_restart_instance(self, _) -> None:
+        self.logger.info("Restart Instance")
+        self.future.cancel()
+        try:
+            await self.future.result()
+        except Exception:
+            if self.instance_status != InstanceStatus.Closed:
+                self.android.kill()
+                time.sleep(1)
+            self.instance_status = InstanceStatus.Starting
+            self.android = Android(
+                self.bluestacks_app_path,
+                self.bluestacks_conf_path,
+                self.bluestacks_sharedFolder_path,
+                self.bluestacks_instance_name,
+                self.minitouch_port
+            )
+            self.android.initialize()
+            self.village_handler = VillageHandler(self.logger,
+                                                  self.android,
+                                                  self.instance_config["profiles"]
+                                                  )
+            coroutine = self.village_handler.run()
+            self.future = asyncio.run_coroutine_threadsafe(
+                coroutine, self.loop)
+            self.instance_status = InstanceStatus.Running
+
+    async def on_stop_instance(self, _) -> None:
+        self.logger.info("Stop Instance")
+        self.future.cancel()
+        try:
+            await self.future.result()
+        except Exception:
+            self.instance_status = InstanceStatus.Stopped
+
+    async def on_resume_instance(self, _) -> None:
+        self.logger.info("Resume Instance")
+        coroutine = self.village_handler.run()
+        self.future = asyncio.run_coroutine_threadsafe(
+            coroutine, self.loop)
 
     def on_screenshot(self, path: str) -> None:
         screenshot = self.android.get_screenshot()

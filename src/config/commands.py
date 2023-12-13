@@ -4,5 +4,8 @@ from enum import Enum
 class Commands(Enum):
     StartInstance = 0
     CloseInstance = 1
-    Screenshot = 2
-    PullSharedPrefs = 3
+    RestartInstance = 2
+    StopInstance = 3
+    ResumeInstance = 4
+    Screenshot = 5
+    PullSharedPrefs = 6

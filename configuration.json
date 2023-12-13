@@ -7,15 +7,12 @@
   "instances": [{
     "profiles": [
       "Flori",
-      "MiniFlori"
-    ]
-  }, 
-  {
-    "profiles": [
       "TinyFlori",
+      "MiniFlori",
       "TSS",
       "MaxedSoon",
-      "Florinho"
+      "Florinho",
+      "Mindistor"
     ]
   }]
 }
