@@ -101,7 +101,7 @@ class Instance(Thread):
         )
 
     async def on_close_instance(self, _) -> None:
-        if self.instance_status == InstanceStatus.Closed or self.instance_status:
+        if self.instance_status == InstanceStatus.Closed:
             return
         self.logger.info("Close Instance")
         self.future.cancel()
@@ -141,6 +141,8 @@ class Instance(Thread):
             self.instance_status = InstanceStatus.Running
 
     async def on_stop_instance(self, _) -> None:
+        if self.instance_status == InstanceStatus.Closed and self.instance_status == InstanceStatus.Stopped:
+            return
         self.logger.info("Stop Instance")
         self.future.cancel()
         try:
@@ -149,6 +151,8 @@ class Instance(Thread):
             self.instance_status = InstanceStatus.Stopped
 
     async def on_resume_instance(self, _) -> None:
+        if self.instance_status != InstanceStatus.Stopped:
+            return
         self.logger.info("Resume Instance")
         coroutine = self.village_handler.run()
         self.future = asyncio.run_coroutine_threadsafe(

@@ -3,8 +3,11 @@ use su to have acess to /data/data/com.supercell.clashofclans/shared_prefs folde
 
 MyBot shared_prefs: https://github.com/MyBotRun/MyBot/blob/develop/COCBot/functions/Android/Android.au3 line 4646
 
-You can use this command to copy all:
-cp -r /mnt/windows/BstSharedFolder/shared_prefs/. /data/data/com.supercell.clashofclans/shared_prefs
+You can use this command to save:
+cp -r /data/data/com.supercell.clashofclans/shared_prefs /mnt/windows/BstSharedFolder/acb_profiles/$name/shared_prefs
+
+You can use this command to load:
+cp -r /mnt/windows/BstSharedFolder/shared_prefs/$name/. /data/data/com.supercell.clashofclans/shared_prefs
 
 possible ids stored:
 __hs_lite_sdk_store.xml -> "active_user"

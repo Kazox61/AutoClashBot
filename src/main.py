@@ -6,7 +6,6 @@ import os
 import re
 from pathlib import Path
 from config.commands import Commands
-import time
 
 
 def get_instance_names(conf_path) -> list[str]:
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     for i, instance in enumerate(config['instances']):
         event_emitter.on(
             f"{i}:{Commands.StartInstance.value}",
-            lambda _: start_instance(i)
+            lambda _, i=i: start_instance(i)
         )
 
     server = ServerThread("localhost", 9339)

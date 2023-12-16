@@ -43,7 +43,6 @@ class VillageHandler:
         return True
 
     async def run(self) -> None:
-        print("RUN VILLAGE HANDLER")
         self.active_village = self.villages[self.current_account_index]
         self.switch_account(self.active_village.profile_name)
 
