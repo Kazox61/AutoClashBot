@@ -2,10 +2,12 @@ import re
 from adbutils import adb, AdbClient, AdbDevice
 from pywinauto.application import Application
 import time
-from logging import getLogger
+from logging import Logger
 import os
 from pathlib import Path
 import subprocess
+from core import instance
+
 remote_sharedFolder_path = Path("/mnt/windows/BstSharedFolder")
 shared_prefs_path = Path("/data/data/com.supercell.clashofclans/shared_prefs")
 
@@ -18,6 +20,7 @@ class Bluestacks:
         sharedFolder_path: Path,
         instance_name: str
     ) -> None:
+        self.logger: Logger = instance.thread_storage.logger
         self.app_path = app_path
         self.conf_path = conf_path
         self.sharedFolder_path = sharedFolder_path
@@ -25,7 +28,6 @@ class Bluestacks:
         self.window_title = f"acb-{instance_name}"
 
     def setup(self):
-
         os.makedirs(self.sharedFolder_path.as_posix(), exist_ok=True)
         """
         self.set_global_config_values({
@@ -60,7 +62,7 @@ class Bluestacks:
         return self.adb_client, self.adb_device
 
     def start_virtual_device(self) -> None:
-        getLogger("acb.core").info(
+        self.logger.info(
             f"Starting Bluestacks:{self.instance_name}")
         self.application = Application().start(
             f"{self.app_path.as_posix()} --instance {self.instance_name}")

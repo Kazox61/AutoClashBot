@@ -1,4 +1,5 @@
-from logging import getLogger
+from logging import Logger
+from core import instance
 import socket
 import time
 from core.bluestacks import Bluestacks
@@ -64,7 +65,7 @@ class Minitouch:
         self.minitouch_client: socket.socket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
         self.default_pressure = 50
-        self.logger = getLogger("acb.core")
+        self.logger = instance.thread_storage.logger
 
     def setup(self, adb_device: AdbDevice, bluestacks: Bluestacks):
         self.adb_device = adb_device

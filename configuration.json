@@ -4,21 +4,44 @@
   "bluestacksInstanceConfPath": "C:/ProgramData/BlueStacks_nxt/Engine/$instanceName/$instanceName.bstk",
   "bluestacksSharedFolderPath": "C:/ProgramData/BlueStacks_nxt/Engine/UserData/SharedFolder",
   "minitouchStartPort": 58800,
-  "instances": [{
-    "profiles": [
-      "TinyFlori",
-      "MiniFlori",
-      "TSS",
-      "MaxedSoon"
-    ]
-  },
-  {
-    "profiles": [
-      "Florinho",
-      "Mindistor",
-      "overrated",
-      "ct"
-    ]
-  }
-]
+  "instances": [
+    {
+      "profiles": [
+        "TinyFlori",
+        "MiniFlori",
+        "TSS",
+        "MaxedSoon"
+      ]
+    },
+    {
+      "profiles": [
+        "Florinho",
+        "Mindistor",
+        "overrated",
+        "ct"
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": 1,
+      "name": "Flori"
+    },
+    {
+      "id": 2,
+      "name": "TinyFlori"
+    },
+    {
+      "id": 3,
+      "name": "MiniFlori"
+    },
+    {
+      "id": 4,
+      "name": "Tss"
+    },
+    {
+      "id": 5,
+      "name": "MaxedSoon"
+    }
+  ]
 }

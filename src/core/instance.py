@@ -1,4 +1,5 @@
 from pymitter import EventEmitter
+import threading
 from threading import Thread
 from bot.village_handler import VillageHandler
 from core.android import Android
@@ -10,6 +11,8 @@ from pathlib import Path
 import asyncio
 import time
 from enum import Enum
+
+thread_storage = threading.local()
 
 
 class InstanceStatus(Enum):
@@ -39,7 +42,6 @@ class Instance(Thread):
                 __file__,
                 f"../../../logs/{self.bluestacks_instance_name}.log"
             ),
-            None,
             logging.DEBUG
         )
         self.bluestacks_app_path = bluestacks_app_path
@@ -49,10 +51,11 @@ class Instance(Thread):
         self.instance_index = instance_index
         self.instance_config = instance_config
         self.event_emitter = event_emitter
-        self.init_events()
         Thread.__init__(self)
 
     def run(self) -> None:
+        thread_storage.logger = self.logger
+        thread_storage.name = self.bluestacks_instance_name
         self.instance_status = InstanceStatus.Starting
         self.android = Android(
             self.bluestacks_app_path,
@@ -74,33 +77,7 @@ class Instance(Thread):
         self.instance_status = InstanceStatus.Running
         self.loop.run_forever()
 
-    def init_events(self) -> None:
-        self.event_emitter.on(
-            f"{self.instance_index}:{Commands.CloseInstance.value}",
-            self.on_close_instance
-        )
-        self.event_emitter.on(
-            f"{self.instance_index}:{Commands.RestartInstance.value}",
-            self.on_restart_instance
-        )
-        self.event_emitter.on(
-            f"{self.instance_index}:{Commands.StopInstance.value}",
-            self.on_stop_instance
-        )
-        self.event_emitter.on(
-            f"{self.instance_index}:{Commands.ResumeInstance.value}",
-            self.on_resume_instance
-        )
-        self.event_emitter.on(
-            f"{self.instance_index}:{Commands.Screenshot.value}",
-            self.on_screenshot
-        )
-        self.event_emitter.on(
-            f"{self.instance_index}:{Commands.PullSharedPrefs.value}",
-            self.on_pull_shared_prefs
-        )
-
-    async def on_close_instance(self, _) -> None:
+    async def on_close_instance(self) -> None:
         if self.instance_status == InstanceStatus.Closed:
             return
         self.logger.info("Close Instance")
@@ -113,7 +90,7 @@ class Instance(Thread):
             self.loop.stop()
             self.instance_status = InstanceStatus.Closed
 
-    async def on_restart_instance(self, _) -> None:
+    async def on_restart_instance(self) -> None:
         self.logger.info("Restart Instance")
         self.future.cancel()
         try:
@@ -140,7 +117,7 @@ class Instance(Thread):
                 coroutine, self.loop)
             self.instance_status = InstanceStatus.Running
 
-    async def on_stop_instance(self, _) -> None:
+    async def on_stop_instance(self) -> None:
         if self.instance_status == InstanceStatus.Closed and self.instance_status == InstanceStatus.Stopped:
             return
         self.logger.info("Stop Instance")
@@ -150,7 +127,7 @@ class Instance(Thread):
         except Exception:
             self.instance_status = InstanceStatus.Stopped
 
-    async def on_resume_instance(self, _) -> None:
+    def on_resume_instance(self) -> None:
         if self.instance_status != InstanceStatus.Stopped:
             return
         self.logger.info("Resume Instance")

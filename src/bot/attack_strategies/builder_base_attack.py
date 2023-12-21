@@ -1,6 +1,6 @@
 from core.android import Android
 from cv.extensions import *
-from bot.utils.line_extensions import get_red_lines, distribute_points_on_lines
+from bot.utils.line_extensions import get_red_lines
 import time
 
 start_center_x = 90

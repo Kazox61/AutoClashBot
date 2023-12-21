@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button id="send-button">Send-Button</button>
+    <script>
+        let websocket = new WebSocket("ws://localhost:8000/updates");
+        websocket.onopen = () => {
+            console.log("WebSocket connection to server established.");
+        };
+
+        websocket.onclose = () => {
+            console.log("WebSocket connection closed. We are offline!");
+        };
+
+        websocket.onerror = () => {
+            console.log("WebSocket connection got an error.");
+        };
+
+        websocket.onmessage = (messageEvent) => {
+            let data = messageEvent.data;
+            console.log("WebSocket message received with data: ", data);
+
+            let message = JSON.parse(data);
+
+            
+        };
+
+        document.getElementById("send-button").addEventListener("click", async () => {
+            await fetch("/anything", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({hello: "Moin"})
+            });
+        });
+    </script>
+</body>
+</html>

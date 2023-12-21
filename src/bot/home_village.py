@@ -3,6 +3,7 @@ from logging import Logger
 from cv.yolo_detector import YoloDetector
 from cv.text_finder import TextFinder
 from bot.attack_strategies.circular_attack import CircularAttack
+from bot.attack_strategies.smart_attack import SmartAttack
 from bot.dead_base_searcher import DeadBaseSearcher
 import time
 from config.buttons import Buttons
@@ -38,7 +39,7 @@ class HomeVillage:
             self.building_detector,
             self.text_finder
         )
-        self.circular_attack = CircularAttack(self.android)
+        self.circular_attack = SmartAttack(self.android)
 
     def is_in_home_village(self) -> bool:
         screenshot = self.android.get_screenshot()
