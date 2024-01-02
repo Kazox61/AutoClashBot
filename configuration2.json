@@ -1,0 +1,55 @@
+{
+  "bluestacksAppPath": "C:/Program Files/BlueStacks_nxt/HD-PLAYER.exe",
+  "bluestacksConfPath": "C:/ProgramData/BlueStacks_nxt/bluestacks.conf",
+  "bluestacksInstanceConfPath": "C:/ProgramData/BlueStacks_nxt/Engine/$instanceName/$instanceName.bstk",
+  "bluestacksSharedFolderPath": "C:/ProgramData/BlueStacks_nxt/Engine/UserData/SharedFolder",
+  "minitouchStartPort": 58800,
+  "instances": [
+    {
+      "profiles": [
+        "TinyFlori",
+        "MiniFlori",
+        "TSS",
+        "MaxedSoon"
+      ]
+    },
+    {
+      "profiles": [
+        "Florinho",
+        "Mindistor",
+        "overrated",
+        "ct"
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": 1,
+      "name": "Flori",
+      "homeVillage": {
+        "farm": true,
+        "collectResources": true
+      },
+      "builderBase": {
+        "farm": true,
+        "collectResources": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "TinyFlori"
+    },
+    {
+      "id": 3,
+      "name": "MiniFlori"
+    },
+    {
+      "id": 4,
+      "name": "Tss"
+    },
+    {
+      "id": 5,
+      "name": "MaxedSoon"
+    }
+  ]
+}

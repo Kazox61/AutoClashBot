@@ -5,6 +5,7 @@ from cv.text_finder import TextFinder
 from bot.attack_strategies.circular_attack import CircularAttack
 from bot.attack_strategies.smart_attack import SmartAttack
 from bot.dead_base_searcher import DeadBaseSearcher
+from bot.clan_games import ClanGames
 import time
 from config.buttons import Buttons
 from bot.utils.button_touch import ButtonTouch
@@ -40,6 +41,7 @@ class HomeVillage:
             self.text_finder
         )
         self.circular_attack = SmartAttack(self.android)
+        self.clan_games = ClanGames(self.android)
 
     def is_in_home_village(self) -> bool:
         screenshot = self.android.get_screenshot()
@@ -198,6 +200,10 @@ class HomeVillage:
             await asyncio.sleep(1)
             self.zoom_out()
             await asyncio.sleep(1)
+
+            self.clan_games.play_clan_games()
+            await asyncio.sleep(1)
+
             self.collect_resources()
             await asyncio.sleep(1)
             # self.try_activate_super_troop() #integrated in the quick_train function

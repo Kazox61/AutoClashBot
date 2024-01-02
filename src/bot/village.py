@@ -3,7 +3,7 @@ from logging import Logger
 from cv.yolo_detector import YoloDetector
 from cv.text_finder import TextFinder
 from bot.home_village import HomeVillage
-from bot.builder_base import BuilderBase
+from bot.night_village import NightVillage
 from pathlib import Path
 import cv2
 from cv.extensions import template_matching
@@ -29,7 +29,8 @@ class Village:
         self.android: Android = android
         self.home_village = HomeVillage(
             self.logger, self.android, building_detector, text_finder)
-        self.builder_base = BuilderBase(self.logger, self.android, text_finder)
+        self.night_village = NightVillage(
+            self.logger, self.android, text_finder)
 
     def try_switch_game_mode(self) -> bool:
         self.logger.debug("Try switching game mode")
@@ -45,3 +46,6 @@ class Village:
 
     async def run(self) -> None:
         await self.home_village.run()
+        # self.try_switch_game_mode()
+        # await self.night_village.run()
+        # self.try_switch_game_mode()

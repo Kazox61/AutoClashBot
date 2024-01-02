@@ -7,7 +7,7 @@ You can use this command to save:
 cp -r /data/data/com.supercell.clashofclans/shared_prefs /mnt/windows/BstSharedFolder/acb_profiles/$name/shared_prefs
 
 You can use this command to load:
-cp -r /mnt/windows/BstSharedFolder/shared_prefs/$name/. /data/data/com.supercell.clashofclans/shared_prefs
+ cp -r /mnt/windows/BstSharedFolder/acb_profiles/$name/shared_prefs/. /data/data/com.supercell.clashofclans/shared_prefs
 
 possible ids stored:
 __hs_lite_sdk_store.xml -> "active_user"

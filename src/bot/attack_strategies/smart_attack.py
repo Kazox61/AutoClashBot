@@ -2,7 +2,7 @@ from core.android import Android
 import time
 from config.buttons import Buttons
 from bot.utils.button_touch import ButtonTouch
-from bot.utils.home_base import HomeBase
+from bot.base.home_base import HomeBase
 import math
 
 

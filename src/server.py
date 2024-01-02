@@ -11,7 +11,6 @@ import os
 import re
 from pathlib import Path
 from tinydb import TinyDB, Query
-from tinydb.operations import add, subtract
 
 db = TinyDB('../conf.json')
 
@@ -181,10 +180,20 @@ async def websocket_endpoint(websocket: WebSocket):
         clients.remove(websocket)
 
 
+create_instance_thread(0)
+create_instance_thread(1)
+
 if __name__ == "__main__":
     config = uvicorn_Config(app=app, loop="asyncio",
                             host="127.0.0.1", port=8000)
     server = Server(config)
 
     loop.create_task(server.serve())
+
+    ###################################
+    # just for quick testing
+    create_instance_thread(0)
+    # create_instance_thread(1)
+    ####################################
+
     loop.run_forever()
